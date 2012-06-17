@@ -1,0 +1,6 @@
+<settings>
+	<port>5555</port>
+	<numclients>1</numclients>
+	<framerate>5</framerate>
+	<debug>0</debug>
+</settings>
