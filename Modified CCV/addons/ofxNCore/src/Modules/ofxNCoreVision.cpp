@@ -16,6 +16,7 @@
 *****************************************************************************/
 void ofxNCoreVision::_setup(ofEventArgs &e)
 {
+	ofSetFrameRate(60);
 	//set the title
 	ofSetWindowTitle("Community Core Vision - 1.5");
 	//create filter
@@ -162,15 +163,15 @@ void ofxNCoreVision::_setup(ofEventArgs &e)
 
 void ofxNCoreVision::frameEvent() {
     // read any incoming messages
-   if (syncClient.messageAvailable()) {
-        vector<string> msg = syncClient.getDataMessage();
+   //if (syncClient.messageAvailable()) {
+      //  vector<string> msg = syncClient.getDataMessage();
       //  vector<string> xy = ofSplitString(msg[0], ",");
        // float x = ofToInt(xy[0]);
        // float y = ofToInt(xy[1]);
        // Ball* ball = new Ball(x, y, client.getMWidth(), client.getMHeight());
        // balls.push_back(ball);
 
-    }
+   // }
 }
 
 /****************************************************************
@@ -612,8 +613,9 @@ void ofxNCoreVision::grabFrameToGPU(GLuint target)
 *****************************************************************************/
 void ofxNCoreVision::_draw(ofEventArgs &e)
 {
-
+	if(bTCPSync && syncClient.isRendering()){
 	syncClient.done();
+	}
 	if (showConfiguration)
 	{
 		//if calibration

@@ -70,7 +70,7 @@ class syncserver : public ofxThread {
 		int currentFrame;
 		bool shouldTriggerFrame;
 		vector<Connection> connections;
-		
+		//vector<int> listeners;
 		bool newMessage;
 		string currentMessage;
 		float timeOfNextHeartbeat;

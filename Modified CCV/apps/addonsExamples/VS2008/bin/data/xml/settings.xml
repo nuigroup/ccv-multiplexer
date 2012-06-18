@@ -1,8 +1,9 @@
 <settings>
 	<client_id>0</client_id>
 	<server>
-		<ip>127.0.0.1</ip>
-		<port>11999</port>
+		<ip>192.168.1.4</ip>
+		<serveroutport>11999</serveroutport>
 	</server>
-	<debug>0</debug>
+	<serverinport>11998</serverinport>
+	<protocol>TCP</protocol>
 </settings>

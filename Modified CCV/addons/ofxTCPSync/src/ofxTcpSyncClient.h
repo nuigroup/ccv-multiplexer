@@ -17,17 +17,22 @@ class ofxTCPSyncClient : public ofxThread {
 
 	public:
         ofxTCPSyncClient();
+		~ofxTCPSyncClient() { quit();}
         void  setup(string _fileString, ofxTCPSyncClientListener* _parent, bool _autoMode = true);
-    
+    //void  setup(string _fileString, bool _autoMode = true);
         void  start();
         void  stop();
     
+      //  void  draw();
+    
+    //    int   getPort() { return serverPort; }
         int   getID()   { return id; }
     
         int   getFrameCount() { return frameCount; }
         float getFPS()        { return fps; }
         bool  isRendering()   { return rendering; }
     
+        //void  restoreCamera();
         
         void  broadcast(string _msg);
     
@@ -41,11 +46,11 @@ class ofxTCPSyncClient : public ofxThread {
         void  done();
         void  quit();
     
-     
+      //  bool  DEBUG;
         
    
         void setDefaults() {
-         
+         //   DEBUG = true;
             
             id = 0;
                       
@@ -60,7 +65,7 @@ class ofxTCPSyncClient : public ofxThread {
             
         }
     
-       
+       // void _draw(ofEventArgs &e) { draw(); }
         void threadedFunction();
         
         void loadIniFile(string _fileString);
@@ -80,10 +85,14 @@ class ofxTCPSyncClient : public ofxThread {
 		int			serverOutPort;
         ofxUDPManager udpSender;
 		ofxUDPManager udpReceiver;
+		ofxTCPClient tcpClient;
+		bool bTCP;
+		string msg;
         
-        
+        /** The id is used for communication with the server, to let it know which 
+         *  client is speaking and how to order the screens. */
         int id;
-       
+        /** The total number of screens. */
                
         bool rendering;
         bool autoMode;
@@ -92,7 +101,7 @@ class ofxTCPSyncClient : public ofxThread {
         float fps;
         long  lastMs;
         
-       
+        /** True if all the other clients are connected. */
         bool allConnected;
         
         bool bMessageAvailable;
@@ -101,6 +110,6 @@ class ofxTCPSyncClient : public ofxThread {
         vector<string> dataMessage;
         vector<int>    ints;
         vector<char>   bytes;
-       
-    
+
+		    
 };
