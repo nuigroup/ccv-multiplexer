@@ -5,9 +5,14 @@ syncserver::syncserver() {
 }
 
 void syncserver::setup(string _fileString) {
-    udpReceiver.Create();
-	udpSender.Create();
     loadIniFile(_fileString);
+	if(bTCP)
+	{}
+	else
+	{
+		udpReceiver.Create();
+		udpSender.Create();
+	}
 	for(int i = 0; i < numExpectedClients; i++){
 		Connection c;
 		c.started = false;
@@ -28,16 +33,18 @@ void syncserver::loadIniFile(string _fileString) {
 
     // parse INI file
    // fps   = xmlReader.getValue("settings:server:framerate", 5, 0);
-    fps=25;
-	serverInPort = xmlReader.getValue("settings:server:port", 11999, 0);
-	numClient        = xmlReader.getValue("settings:numclients", 1, 0);
-	broadcast = "192.168.1.255";
-		serverOutPort = 11998;
+    fps=xmlReader.getValue("settings:fps", 5, 0);
+	serverInPort = xmlReader.getValue("settings:serverinport", 11999, 0);
+	serverOutPort = xmlReader.getValue("settings:serveroutport",11998,0);
+	numExpectedClients        = xmlReader.getValue("settings:numclients", 1, 0);
+	broadcast = xmlReader.getValue("settings:broadcast", "192.168.1.255", 0);
+	bTCP = xmlReader.getValue("settings:protocol","UDP") == "TCP";
 
 	//if (xmlReader.getValue("settings:debug", 0, 0) == 1) 
 //        DEBUG = true;
 
-    //out("XML Settings: fps = " + fps + "port:" + ofToString(port) + ", Number of Client = " + ofToString(numClient));
+    out("XML Settings: fps = " + ofToString(fps) + ", Number of Client = " + ofToString(numExpectedClients));
+	
 }
 
 void syncserver::out(string _str) {
@@ -55,18 +62,34 @@ void syncserver::err(string _str) {
 
 void syncserver::start() {
 //    tcpClient.setVerbose(DEBUG);
-	udpSender.SetEnableBroadcast(true);
-	udpSender.Connect("192.168.1.255",serverOutPort);
-	udpSender.SetReuseAddress(true);
-	udpReceiver.SetReuseAddress(true);
-	if(!udpReceiver.Bind(serverInPort)){
-		err("MPE Serever :: Setup failed");
-		return;
+
+	if(bTCP)
+	{
+		if(!tcpServer.setup(serverInPort, false)){
+			err("TCP Serever :: Setup failed");
+			return;
+		}
+		else
+			out("TCP Server setup on::" +ofToString(serverInPort));
 	}
 	else
-		out("Input Server setup on::" +ofToString(serverInPort));
-	out("Output Server setup on::" +ofToString(serverOutPort));
-       
+	{
+	udpSender.SetEnableBroadcast(true);
+	udpSender.SetReuseAddress(true);
+	udpReceiver.SetReuseAddress(true);
+		if(!udpReceiver.Bind(serverInPort)){
+			err("UDP In Server :: Setup failed");
+			return;
+		}
+		else if(!udpSender.Connect("192.168.1.255",serverOutPort)){
+			err("UDP Out Server :: Setup Failed");
+			return;
+		}
+		else{
+			out("UDP Input Server setup on::" +ofToString(serverInPort));
+			out("UDP Output Server setup on::" +ofToString(serverOutPort));
+		}
+	}
   startThread(true,false);  // blocking, verbose
 }
 
@@ -74,7 +97,7 @@ void syncserver::threadedFunction() {
     out("Running!");
         
     while (isThreadRunning()) {
-		//if (lock()) {
+		if (lock()) {
 			//shouldTriggerFrame=true;
 			if(shouldTriggerFrame){
 				float now = ofGetElapsedTimef();
@@ -97,7 +120,27 @@ void syncserver::threadedFunction() {
 			}
 
 			else {
-				lock();
+				//lock();
+
+			/*	bool lostConnection = false;
+				for(int c = 0; c < numExpectedClients; c++){
+					if(connections[c].started && !server.isClientConnected(connections[c].tcpServerIndex)){
+						connections[c].started = false;
+						lostConnection = true;
+					}
+				}*/
+
+
+				if(bTCP){
+					for(int i = 0; i < tcpServer.getLastID(); i++){
+						string response = tcpServer.receive(i);
+						if (response.length() > 0) {
+							read(response,i);
+						}	
+					}
+				}
+				
+				else{
 					char udpMessage[10];
 					udpReceiver.Receive(udpMessage,10);
 					string response = udpMessage;
@@ -105,7 +148,7 @@ void syncserver::threadedFunction() {
 					if (response.length() > 0) {
 						read(response);
 					}	
-
+				}
 					if(!allconnected){
 						allconnected = true;
 						for(int c = 0; c < connections.size(); c++){
@@ -119,6 +162,7 @@ void syncserver::threadedFunction() {
 							cout << "All clients connected!" << endl;
 						}
 					}
+					
 					//All connected and going
 					else {
 						bool allready = true;
@@ -134,14 +178,14 @@ void syncserver::threadedFunction() {
 					}
 					
 			
-				unlock();
-				ofSleepMillis(5);
+				//unlock();
+				//ofSleepMillis(5);
 			}
 			
 		
-			//unlock();
-			
-		//}
+			unlock();
+			ofSleepMillis(5);
+		}
 	}
 }
 
@@ -174,10 +218,41 @@ void syncserver::read(string response) {
 					connections[clientID].ready = true;
 					//cout << " client " << clientID << " is ready " << endl
 				}
-				//else if(fc<currentFrame)
-				//{	//currentFrame=fc;
-				//connections[clientID].ready = true;
-				//}
+				
+			}
+	}
+	
+}
+
+void syncserver::read(string response,int i) {
+	out("Receiving: " + response);
+
+	char first = response.at(0);
+	if(first == 'S'){
+					//that's the start!
+			int clientID = ofToInt(response.substr(1,1));
+			if(clientID < numExpectedClients){
+					vector<string> info = ofSplitString(response, ",");
+					connections[clientID].tcpServerIndex = i;
+					connections[clientID].started = true;
+//					connections[clientID].name = info[1];
+					cout << "Client ID " << clientID << " with response " << response << endl;
+				}
+			else{
+					err("Received Client ID " + ofToString(clientID)  + " out of range");
+				}
+	}
+	else if(first == 'D'){
+			vector<string> info = ofSplitString(response, ",");
+			if(info.size() >= 3){
+				int clientID = ofToInt(info[1]);
+				int fc = ofToInt(info[2]);
+				if(fc == currentFrame){
+					//todo validate client id
+					connections[clientID].ready = true;
+					//cout << " client " << clientID << " is ready " << endl;
+				}
+				
 			}
 	}
 	
@@ -185,17 +260,26 @@ void syncserver::read(string response) {
 
 void syncserver::send(string _msg) {
     out("Sending: " + _msg);
-    
-    _msg += "\n";
+   // _msg += "\n";
+
+	if(bTCP)
+	{
+		if(allconnected)
+		tcpServer.sendToAll(_msg);
+	}
+	else
 	udpSender.Send(_msg.c_str(),_msg.length());
 }
 
 void syncserver::quit() {
     out("Quitting.");
-//	if(server.isConnected()){
+	if(bTCP){
+		tcpServer.close();
+	}
+	else{
 		udpSender.Close();
 		udpReceiver.Close();
-	//}
+	}
 	connections.clear();
     stopThread();
 }

@@ -1,6 +1,8 @@
 <settings>
-	<port>5555</port>
+	<serverinport>11999</serverinport>
+	<serveroutport>11998</serveroutport>
 	<numclients>1</numclients>
-	<framerate>10</framerate>
-	<debug>0</debug>
+	<fps>5</fps>
+	<broadcast>192.168.1.255</broadcast>
+	<protocol>TCP</protocop>
 </settings>

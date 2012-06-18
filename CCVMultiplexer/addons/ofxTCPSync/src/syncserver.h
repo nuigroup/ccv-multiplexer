@@ -28,7 +28,7 @@ class syncserver : public ofxThread {
 	   int serverOutPort;
 	   string broadcast;
         long  lastMs;
-		int numClient;
+		//int numClient;
 
 		 void setDefaults() {
          //   DEBUG = true;
@@ -56,9 +56,11 @@ class syncserver : public ofxThread {
 
        // void run();
         void read(string response);
+		void read(string response, int i);
         void send(string _msg);
 		
-		  
+		bool bTCP;
+		ofxTCPServer tcpServer;
 	   	ofxUDPManager udpSender;
 		ofxUDPManager udpReceiver;
 		float lastFrameTriggeredTime;

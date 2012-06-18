@@ -110,7 +110,8 @@ bool ofxTCPServer::sendToAll(string message){
 string ofxTCPServer::receive(int clientID){
 	if( !isClientSetup(clientID) ){
 		if(verbose)printf("ofxTCPServer: client %i doesn't exist\n", clientID);
-		return "client doesn't exist";
+		{
+		return "client doesn't exist";}
 	}
 	
 	if( !TCPConnections[clientID].isConnected() ){
