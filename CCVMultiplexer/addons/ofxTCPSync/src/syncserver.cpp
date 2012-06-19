@@ -233,6 +233,7 @@ void syncserver::read(string response) {
 		connections[clientID].started = false;
 		connections[clientID].ready = false;
 		setDefaults();
+		
 		//currentFrame=0;
 		//shouldTriggerFrame=false;
 		//ofSleepMillis(5);
@@ -274,13 +275,17 @@ void syncserver::read(string response,int i) {
 			}
 	}
 	else if(first == 'X'){
+		
+		ofSleepMillis(150);
+		send("X");
+		ofSleepMillis(50);
 		int clientID = ofToInt(response.substr(1,1));
 		out("Diconnect client"+ofToString(i));
-		tcpServer.disconnectClient(i);
-		connections.erase(connections.begin()+clientID);
-		currentFrame=0;
-		shouldTriggerFrame=false;
-		
+		tcpServer.disconnectClient(clientID);
+		connections[clientID].started = false;
+		connections[clientID].ready = false;
+		setDefaults();
+		restartServer();
 	}
 }
 
@@ -308,6 +313,15 @@ void syncserver::quit() {
 	}
 	connections.clear();
     stopThread();
+}
+
+void syncserver::restartServer(){
+	out("Restarting TCP Server");
+	tcpServer.close();
+	stopThread();
+	ofSleepMillis(500);
+	start();
+	out("TCP Server Restart Complete!!!");
 }
 
 

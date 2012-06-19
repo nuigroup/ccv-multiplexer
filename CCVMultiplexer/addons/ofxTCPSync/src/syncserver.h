@@ -49,6 +49,7 @@ class syncserver : public ofxThread {
 		  void threadedFunction();
         
         void loadIniFile(string _fileString);
+		void restartServer();
         
         void  out(string _msg);
         void  print(string _msg);
