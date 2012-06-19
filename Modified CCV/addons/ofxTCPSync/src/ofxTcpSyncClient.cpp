@@ -12,6 +12,10 @@ void ofxTCPSyncClient::setup(string _fileString, ofxTCPSyncClientListener* _pare
     autoMode = _autoMode;
     
     loadIniFile(_fileString);
+	
+}
+
+void ofxTCPSyncClient::create(){
 	if(bTCP)
 	{}
 	else{
@@ -68,7 +72,7 @@ void ofxTCPSyncClient::start() {
 	}
 
 	else{
-	    if (!udpSender.Connect("127.0.0.1", 11999)) {
+		if (!udpSender.Connect(hostName.c_str(), 11999)) {
 		    err("UDP Out Server :: Setup Failed");
 			return;
 		}
@@ -197,12 +201,23 @@ void ofxTCPSyncClient::done() {
 //--------------------------------------------------------------
 void ofxTCPSyncClient::quit() {
     out("Quitting.");
-	if(bTCP)
+	if(bTCP){
+		sendDisconnect();
+		ofSleepMillis(500);
 		tcpClient.close();
+	}
 	else{
+		sendDisconnect();
 		udpReceiver.Close();
 		udpSender.Close();
 	}
     stopThread();
 }
 
+void ofxTCPSyncClient::sendDisconnect() {
+
+	send("X" + ofToString(id));
+	setDefaults();
+
+
+}

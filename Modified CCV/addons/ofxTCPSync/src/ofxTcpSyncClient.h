@@ -19,12 +19,11 @@ class ofxTCPSyncClient : public ofxThread {
         ofxTCPSyncClient();
 		~ofxTCPSyncClient() { quit();}
         void  setup(string _fileString, ofxTCPSyncClientListener* _parent, bool _autoMode = true);
-    //void  setup(string _fileString, bool _autoMode = true);
+   
         void  start();
         void  stop();
-    
-      //  void  draw();
-    
+		void create();
+   
     //    int   getPort() { return serverPort; }
         int   getID()   { return id; }
     
@@ -77,6 +76,7 @@ class ofxTCPSyncClient : public ofxThread {
         void run();
         void read(string _serverInput);
         void send(string _msg);
+		void sendDisconnect();
     
         ofxTCPSyncClientListener* parent;
     

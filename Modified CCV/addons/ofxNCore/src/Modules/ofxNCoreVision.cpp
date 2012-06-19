@@ -16,7 +16,7 @@
 *****************************************************************************/
 void ofxNCoreVision::_setup(ofEventArgs &e)
 {
-	ofSetFrameRate(60);
+	//ofSetFrameRate(60);
 	//set the title
 	ofSetWindowTitle("Community Core Vision - 1.5");
 	//create filter
@@ -30,7 +30,9 @@ void ofxNCoreVision::_setup(ofEventArgs &e)
 	
 	if(bTCPSync)
 	{
+		syncClient.create();
 		syncClient.start();
+		
 	}
 	if(debugMode)
 	{
@@ -49,14 +51,6 @@ void ofxNCoreVision::_setup(ofEventArgs &e)
 	}
 
 	cameraInited = false;
-
-
-	//Node Sync 
-	//if(bTCPSync)
-	//{
-	
-	//TCPSyncClient.start();
-	//}
 
 	//Setup Window Properties
 	ofSetWindowShape(winWidth,winHeight);
@@ -280,6 +274,7 @@ void ofxNCoreVision::loadXMLSettings()
 
 void ofxNCoreVision::saveSettings()
 {
+	bTCPSync = false;
 	XML.setValue("CONFIG:MULTIPLEXER:WIDTH", (int)camWidth);
 	XML.setValue("CONFIG:MULTIPLEXER:HEIGHT", (int)camHeight);
 	XML.setValue("CONFIG:MULTIPLEXER:FRAMERATE", camRate);

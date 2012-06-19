@@ -729,6 +729,7 @@ void ofxNCoreVision ::handleGui(int parameterId, int task, void* data, int lengt
 				bTCPSync = *(bool*)data;
 				if(bTCPSync == true)
 				{	
+				syncClient.create();
 				syncClient.start();
 				}
 				else

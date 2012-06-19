@@ -5,5 +5,5 @@
 		<serveroutport>11999</serveroutport>
 	</server>
 	<serverinport>11998</serverinport>
-	<protocol>TCP</protocol>
+	<protocol>UDP</protocol>
 </settings>

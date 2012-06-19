@@ -22,7 +22,7 @@
                     <AUTO>0</AUTO>
                 </CONTRAST>
                 <GAIN>
-                    <VALUE>225</VALUE>
+                    <VALUE>33</VALUE>
                     <AUTO>0</AUTO>
                 </GAIN>
                 <SATURATION>
@@ -34,7 +34,7 @@
                     <AUTO>0</AUTO>
                 </SHARPNESS>
                 <EXPOSURE>
-                    <VALUE>-7</VALUE>
+                    <VALUE>-5</VALUE>
                     <AUTO>1</AUTO>
                 </EXPOSURE>
                 <FRAMERATE>15</FRAMERATE>
