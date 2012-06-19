@@ -12,6 +12,8 @@ void syncserver::setup(string _fileString) {
 	{
 		udpReceiver.Create();
 		udpSender.Create();
+		udpReceiver.SetReuseAddress(true);
+		udpSender.SetReuseAddress(true);
 	}
 	for(int i = 0; i < numExpectedClients; i++){
 		Connection c;
@@ -133,9 +135,11 @@ void syncserver::threadedFunction() {
 
 				if(bTCP){
 					for(int i = 0; i < tcpServer.getLastID(); i++){
+						if(tcpServer.isClientConnected(i)){
 						string response = tcpServer.receive(i);
 						if (response.length() > 0) {
 							read(response,i);
+						}
 						}	
 					}
 				}
@@ -148,6 +152,7 @@ void syncserver::threadedFunction() {
 					if (response.length() > 0) {
 						read(response);
 					}	
+					
 				}
 					if(!allconnected){
 						allconnected = true;
@@ -161,6 +166,7 @@ void syncserver::threadedFunction() {
 							shouldTriggerFrame = true;
 							cout << "All clients connected!" << endl;
 						}
+						
 					}
 					
 					//All connected and going
@@ -171,6 +177,7 @@ void syncserver::threadedFunction() {
 							allready = false;
 							break;
 						}
+						
 					}
 					if(allready){
 						shouldTriggerFrame = true;
@@ -221,6 +228,17 @@ void syncserver::read(string response) {
 				
 			}
 	}
+	else if(first == 'X'){
+		int clientID = ofToInt(response.substr(1,1));
+		connections[clientID].started = false;
+		connections[clientID].ready = false;
+		setDefaults();
+		//currentFrame=0;
+		//shouldTriggerFrame=false;
+		//ofSleepMillis(5);
+		
+	}
+	
 	
 }
 
@@ -255,7 +273,15 @@ void syncserver::read(string response,int i) {
 				
 			}
 	}
-	
+	else if(first == 'X'){
+		int clientID = ofToInt(response.substr(1,1));
+		out("Diconnect client"+ofToString(i));
+		tcpServer.disconnectClient(i);
+		connections.erase(connections.begin()+clientID);
+		currentFrame=0;
+		shouldTriggerFrame=false;
+		
+	}
 }
 
 void syncserver::send(string _msg) {

@@ -33,8 +33,8 @@ class syncserver : public ofxThread {
 		 void setDefaults() {
          //   DEBUG = true;
             allconnected = false;
-			fps = 30;
-			numExpectedClients = 1;
+		//	fps = 30;
+		//	numExpectedClients = 1;
 			numConnectedClients = 0;
 			currentFrame = 0;
 			shouldTriggerFrame = false;

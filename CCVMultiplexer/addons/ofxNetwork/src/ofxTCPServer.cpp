@@ -71,6 +71,7 @@ bool ofxTCPServer::disconnectClient(int clientID){
 	}
 	else if(TCPConnections[clientID].close()){
 		TCPConnections.erase(clientID);
+		idCount=0;
 		return true;
 	}
 	return false;
