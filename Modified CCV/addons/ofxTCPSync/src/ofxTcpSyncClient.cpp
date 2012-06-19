@@ -124,7 +124,7 @@ void ofxTCPSyncClient::read(string _serverInput) {
     out("Receiving: " + _serverInput);
         
     char c = _serverInput.at(0);
-    if (c == 'G' || c == 'B' || c == 'I') {
+	if (c == 'G' || c == 'B' || c == 'I') {
         if (!allConnected) {
 //            if (DEBUG) out("all connected!");
             allConnected = true;
@@ -164,6 +164,14 @@ void ofxTCPSyncClient::read(string _serverInput) {
             }
         }
     }
+
+	if (c == 'X')
+	{
+		tcpClient.close();
+		stopThread();
+		ofSleepMillis(500);
+		start();
+	}
 }
 
 void ofxTCPSyncClient::send(string _msg) {
@@ -203,8 +211,9 @@ void ofxTCPSyncClient::quit() {
     out("Quitting.");
 	if(bTCP){
 		sendDisconnect();
-		ofSleepMillis(500);
+		ofSleepMillis(250);
 		tcpClient.close();
+		setDefaults();
 	}
 	else{
 		sendDisconnect();
@@ -217,7 +226,5 @@ void ofxTCPSyncClient::quit() {
 void ofxTCPSyncClient::sendDisconnect() {
 
 	send("X" + ofToString(id));
-	setDefaults();
-
-
+	//ofSleepMillis(10);
 }
