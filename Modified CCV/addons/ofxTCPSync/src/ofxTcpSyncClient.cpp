@@ -128,7 +128,7 @@ void ofxTCPSyncClient::read(string _serverInput) {
         if (!allConnected) {
 //            if (DEBUG) out("all connected!");
             allConnected = true;
-			out(ofToString(allConnected));
+			//out(ofToString(allConnected));
         }
        // out ("split into frame message and data message");
         vector<string> info = ofSplitString(_serverInput, ":");
@@ -151,7 +151,7 @@ void ofxTCPSyncClient::read(string _serverInput) {
         
         if (fc == frameCount) {
             rendering = true;
-			//out("rendering true");
+			
             frameCount++;
             
             // calculate new framerate
@@ -163,14 +163,16 @@ void ofxTCPSyncClient::read(string _serverInput) {
                 parent->frameEvent();
             }
         }
+		
+
     }
 
 	if (c == 'X')
 	{
 		tcpClient.close();
 		stopThread();
-		ofSleepMillis(500);
-		start();
+		//ofSleepMillis(500);
+		//start();
 	}
 }
 
@@ -199,8 +201,9 @@ void ofxTCPSyncClient::done() {
     //} else {
     
     rendering = false;
-    string msg = "D," + ofToString(id) + "," + ofToString(frameCount);
+    string msg = "D," + ofToString(id) + "," + ofToString(lastFrame);
     send(msg);
+	lastFrame++;
     //}
 }
 
@@ -211,7 +214,7 @@ void ofxTCPSyncClient::quit() {
     out("Quitting.");
 	if(bTCP){
 		sendDisconnect();
-		ofSleepMillis(250);
+		ofSleepMillis(500);
 		tcpClient.close();
 		setDefaults();
 	}

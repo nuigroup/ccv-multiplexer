@@ -34,7 +34,7 @@ class ofxTCPSyncClient : public ofxThread {
         //void  restoreCamera();
         
         void  broadcast(string _msg);
-    
+		
         bool  messageAvailable() { return bMessageAvailable; }
         vector<string> getDataMessage() { return dataMessage; }
         bool  intsAvailable() { return bIntsAvailable; }
@@ -51,11 +51,11 @@ class ofxTCPSyncClient : public ofxThread {
         void setDefaults() {
          //   DEBUG = true;
             
-            id = 0;
+            //id = 0;
                       
             rendering = false;
             autoMode  = false;
-            
+            lastFrame = 0;
             frameCount = 0;
             fps        = 0.f;
             lastMs     = 0;
@@ -98,6 +98,7 @@ class ofxTCPSyncClient : public ofxThread {
         bool autoMode;
         
         int   frameCount;
+		int   lastFrame;
         float fps;
         long  lastMs;
         

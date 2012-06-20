@@ -16,7 +16,7 @@
 *****************************************************************************/
 void ofxNCoreVision::_setup(ofEventArgs &e)
 {
-	//ofSetFrameRate(60);
+	ofSetFrameRate(60);
 	//set the title
 	ofSetWindowTitle("Community Core Vision - 1.5");
 	//create filter
@@ -1213,7 +1213,7 @@ std::map<int,Blob> ofxNCoreVision::getObjects()
 void ofxNCoreVision::_exit(ofEventArgs &e)
 {
 	saveSettings();
-
+	syncClient.quit();
 	//Save templates
 	if(contourFinder.bTrackObjects)
 		templates.saveTemplateXml();
