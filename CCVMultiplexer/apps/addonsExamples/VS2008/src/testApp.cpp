@@ -4,7 +4,7 @@
 //--------------------------------------------------------------
 void testApp::setup()
 {
-	//ofSetFrameRate(60);
+	ofSetFrameRate(60);
 	ccvm.setup("xml/TCPSyncServer.xml");
 	ccvm.start();
 }

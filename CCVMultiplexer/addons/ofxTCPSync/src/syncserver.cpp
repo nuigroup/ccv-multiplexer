@@ -136,10 +136,10 @@ void syncserver::threadedFunction() {
 				if(bTCP){
 					for(int i = 0; i < tcpServer.getLastID(); i++){
 						if(tcpServer.isClientConnected(i)){
-						string response = tcpServer.receive(i);
-						if (response.length() > 0) {
-							read(response,i);
-						}
+							string response = tcpServer.receive(i);
+							if (response.length() > 0) {
+								read(response,i);
+							}
 						}	
 					}
 				}
@@ -152,8 +152,9 @@ void syncserver::threadedFunction() {
 					if (response.length() > 0) {
 						read(response);
 					}	
-					
 				}
+				
+				if(shouldContinue){
 					if(!allconnected){
 						allconnected = true;
 						for(int c = 0; c < connections.size(); c++){
@@ -183,8 +184,8 @@ void syncserver::threadedFunction() {
 						shouldTriggerFrame = true;
 					}
 					}
-					
-			
+					shouldContinue=false;
+				}
 				//unlock();
 				//ofSleepMillis(5);
 			}
@@ -198,7 +199,6 @@ void syncserver::threadedFunction() {
 
 void syncserver::read(string response) {
 	out("Receiving: " + response);
-
 	char first = response.at(0);
 	if(first == 'S'){
 					//this is where it starts!
@@ -209,7 +209,7 @@ void syncserver::read(string response) {
 					connections[clientID].started = true;
 //					connections[clientID].name = info[1];
 					cout << "Client ID " << clientID << " with response " << response << endl;
-					//currentFrame=0;
+					shouldContinue =true;
 				}
 			else{
 					err("Received Client ID " + ofToString(clientID)  + " out of range");
@@ -224,6 +224,7 @@ void syncserver::read(string response) {
 					//todo validate client id
 					connections[clientID].ready = true;
 					//cout << " client " << clientID << " is ready " << endl
+					shouldContinue =true;
 				}
 				
 			}
@@ -233,7 +234,7 @@ void syncserver::read(string response) {
 		connections[clientID].started = false;
 		connections[clientID].ready = false;
 		setDefaults();
-		
+		//allConnected = false
 		//currentFrame=0;
 		//shouldTriggerFrame=false;
 		//ofSleepMillis(5);
@@ -241,11 +242,11 @@ void syncserver::read(string response) {
 	}
 	
 	
+	
 }
 
 void syncserver::read(string response,int i) {
 	out("Receiving: " + response);
-
 	char first = response.at(0);
 	if(first == 'S'){
 					//that's the start!
@@ -256,6 +257,7 @@ void syncserver::read(string response,int i) {
 					connections[clientID].started = true;
 //					connections[clientID].name = info[1];
 					cout << "Client ID " << clientID << " with response " << response << endl;
+					shouldContinue =true;
 				}
 			else{
 					err("Received Client ID " + ofToString(clientID)  + " out of range");
@@ -269,23 +271,38 @@ void syncserver::read(string response,int i) {
 				if(fc == currentFrame){
 					//todo validate client id
 					connections[clientID].ready = true;
+					shouldContinue =true;
 					//cout << " client " << clientID << " is ready " << endl;
 				}
-				
+						
 			}
 	}
 	else if(first == 'X'){
+
 		
-		ofSleepMillis(150);
+		//ofSleepMillis(150);
+		ofSleepMillis(550);
 		send("X");
-		ofSleepMillis(50);
+		ofSleepMillis(500);
 		int clientID = ofToInt(response.substr(1,1));
-		out("Diconnect client"+ofToString(i));
-		tcpServer.disconnectClient(clientID);
-		connections[clientID].started = false;
-		connections[clientID].ready = false;
+		out("Diconnect all clients"+ofToString(i));
+		for(int i = 0; i < numExpectedClients; i++){
+			tcpServer.disconnectClient(i);
+			connections[clientID].started = false;
+			connections[clientID].ready = false;
+		}
+		//send("X");
 		setDefaults();
+		cout<<"Waiting.";
+		//for(int i=0;i<500;i++){
+			//ofSleepMillis(5);
+			//cout<<".";
+		//}
 		restartServer();
+	}
+	else{
+		connections[i].started = false;
+		connections[i].ready =false;
 	}
 }
 
@@ -319,7 +336,7 @@ void syncserver::restartServer(){
 	out("Restarting TCP Server");
 	tcpServer.close();
 	stopThread();
-	ofSleepMillis(500);
+	ofSleepMillis(3000);
 	start();
 	out("TCP Server Restart Complete!!!");
 }

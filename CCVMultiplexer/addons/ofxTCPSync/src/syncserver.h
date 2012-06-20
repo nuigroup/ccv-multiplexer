@@ -23,11 +23,12 @@ class syncserver : public ofxThread {
         void  start();
       
         void  quit();
-		int   frameCount;
+		int   lastFrame;
        int serverInPort;
 	   int serverOutPort;
 	   string broadcast;
         long  lastMs;
+		bool shouldContinue;
 		//int numClient;
 
 		 void setDefaults() {
@@ -37,6 +38,7 @@ class syncserver : public ofxThread {
 		//	numExpectedClients = 1;
 			numConnectedClients = 0;
 			currentFrame = 0;
+			lastFrame = 0;
 			shouldTriggerFrame = false;
 			running = false;
 			newMessage = false;
