@@ -22,7 +22,7 @@
                     <AUTO>0</AUTO>
                 </CONTRAST>
                 <GAIN>
-                    <VALUE>33</VALUE>
+                    <VALUE>225</VALUE>
                     <AUTO>0</AUTO>
                 </GAIN>
                 <SATURATION>
@@ -30,13 +30,62 @@
                     <AUTO>0</AUTO>
                 </SATURATION>
                 <SHARPNESS>
-                    <VALUE>53</VALUE>
+                    <VALUE>3</VALUE>
                     <AUTO>0</AUTO>
                 </SHARPNESS>
                 <EXPOSURE>
-                    <VALUE>-6</VALUE>
+                    <VALUE>-7</VALUE>
                     <AUTO>1</AUTO>
                 </EXPOSURE>
+                <FRAMERATE>15</FRAMERATE>
+                <HUE>
+                    <AUTO>0</AUTO>
+                    <VALUE>8</VALUE>
+                </HUE>
+                <GAMMA>
+                    <AUTO>0</AUTO>
+                    <VALUE>1</VALUE>
+                </GAMMA>
+            </SENSOR>
+        </SETTINGS>
+    </CAMERA>
+    <CAMERA>
+        <SETTINGS>
+            <GUID>1</GUID>
+            <TYPE>DIRECTSHOW</TYPE>
+            <FRAME>
+                <RAW>0</RAW>
+                <WIDTH>320</WIDTH>
+                <HEIGHT>240</HEIGHT>
+                <LEFT>0</LEFT>
+                <TOP>0</TOP>
+            </FRAME>
+            <SENSOR>
+                <MODE>0</MODE>
+                <DEPTH>3</DEPTH>
+                <BRIGHTNESS>
+                    <VALUE>128</VALUE>
+                    <AUTO>0</AUTO>
+                </BRIGHTNESS>
+                <CONTRAST>
+                    <VALUE>32</VALUE>
+                </CONTRAST>
+                <HUE>
+                    <VALUE>8</VALUE>
+                    <AUTO>0</AUTO>
+                </HUE>
+                <GAMMA>
+                    <VALUE>1</VALUE>
+                    <AUTO>0</AUTO>
+                </GAMMA>
+                <SATURATION>
+                    <VALUE>32</VALUE>
+                    <AUTO>0</AUTO>
+                </SATURATION>
+                <SHARPNESS>
+                    <VALUE>3</VALUE>
+                    <AUTO>0</AUTO>
+                </SHARPNESS>
                 <FRAMERATE>15</FRAMERATE>
             </SENSOR>
         </SETTINGS>

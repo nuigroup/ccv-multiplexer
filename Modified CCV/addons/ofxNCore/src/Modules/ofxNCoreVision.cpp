@@ -435,6 +435,7 @@ void ofxNCoreVision::_update(ofEventArgs &e)
 	if(bTCPSync)
 	{
 	bNewFrame = syncClient.isRendering();
+	syncClient.rendering =false;
 	}
 
 	if(!bNewFrame)
@@ -608,7 +609,7 @@ void ofxNCoreVision::grabFrameToGPU(GLuint target)
 *****************************************************************************/
 void ofxNCoreVision::_draw(ofEventArgs &e)
 {
-	if(bTCPSync && syncClient.isRendering()){
+	if(bTCPSync && syncClient.shouldContinue()){
 	syncClient.done();
 	}
 	if (showConfiguration)

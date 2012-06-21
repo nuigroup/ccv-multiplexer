@@ -19,20 +19,13 @@ class ofxTCPSyncClient : public ofxThread {
         ofxTCPSyncClient();
 		~ofxTCPSyncClient() { quit();}
         void  setup(string _fileString, ofxTCPSyncClientListener* _parent, bool _autoMode = true);
-   
         void  start();
         void  stop();
 		void create();
-   
-    //    int   getPort() { return serverPort; }
         int   getID()   { return id; }
-    
         int   getFrameCount() { return frameCount; }
         float getFPS()        { return fps; }
         bool  isRendering()   { return rendering; }
-    
-        //void  restoreCamera();
-        
         void  broadcast(string _msg);
 		
         bool  messageAvailable() { return bMessageAvailable; }
@@ -45,28 +38,19 @@ class ofxTCPSyncClient : public ofxThread {
         void  done();
         void  quit();
     
-      //  bool  DEBUG;
-        
-   
         void setDefaults() {
-         //   DEBUG = true;
-            
-            //id = 0;
-                      
+                             
             rendering = false;
             autoMode  = false;
-            lastFrame = 0;
             frameCount = 0;
             fps        = 0.f;
             lastMs     = 0;
-            
+            cont =false;
             allConnected = false;
             
         }
     
-       // void _draw(ofEventArgs &e) { draw(); }
         void threadedFunction();
-        
         void loadIniFile(string _fileString);
         
         void  out(string _msg);
@@ -77,6 +61,8 @@ class ofxTCPSyncClient : public ofxThread {
         void read(string _serverInput);
         void send(string _msg);
 		void sendDisconnect();
+		bool shouldContinue(){return cont;}
+		bool cont;
     
         ofxTCPSyncClientListener* parent;
     
@@ -98,7 +84,7 @@ class ofxTCPSyncClient : public ofxThread {
         bool autoMode;
         
         int   frameCount;
-		int   lastFrame;
+		//int   lastFrame;
         float fps;
         long  lastMs;
         
