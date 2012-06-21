@@ -12,44 +12,32 @@ typedef struct
 	bool ready;
 	//string name;
 	int tcpServerIndex;
+	bool data;
 } Connection;
 
 
 class syncserver : public ofxThread {
 
 	public:
-       syncserver();
-        void  setup(string _fileString);
-        void  start();
-      
-        void  quit();
-		int   lastFrame;
-       int serverInPort;
-	   int serverOutPort;
-	   string broadcast;
-        long  lastMs;
-		bool shouldContinue;
-		//int numClient;
 
-		 void setDefaults() {
-         //   DEBUG = true;
+        syncserver();
+		void  setup(string _fileString);
+        void  start();
+        void  quit();
+		void shouldContinue();
+		void setDefaults(){
             allconnected = false;
-		//	fps = 30;
-		//	numExpectedClients = 1;
-			numConnectedClients = 0;
+			//numConnectedClients = 0;
 			currentFrame = 0;
-			lastFrame = 0;
 			shouldTriggerFrame = false;
 			running = false;
 			newMessage = false;
 			lastFrameTriggeredTime = 0;
 			timeOfNextHeartbeat = ofGetElapsedTimef();
 			heartBeatInterval = 2.0;
-            
         }
 
-		  void threadedFunction();
-        
+		void threadedFunction();
         void loadIniFile(string _fileString);
 		void restartServer();
         
@@ -57,15 +45,18 @@ class syncserver : public ofxThread {
         void  print(string _msg);
         void  err(string _msg);
 
-       // void run();
         void read(string response);
 		void read(string response, int i);
         void send(string _msg);
 		
-		bool bTCP;
+	    int i;
+		int serverInPort;
+		int serverOutPort;
+	    string broadcast;
 		ofxTCPServer tcpServer;
 	   	ofxUDPManager udpSender;
 		ofxUDPManager udpReceiver;
+		bool bTCP;
 		float lastFrameTriggeredTime;
 		bool allconnected;
 		bool running;
@@ -75,7 +66,6 @@ class syncserver : public ofxThread {
 		int currentFrame;
 		bool shouldTriggerFrame;
 		vector<Connection> connections;
-		//vector<int> listeners;
 		bool newMessage;
 		string currentMessage;
 		float timeOfNextHeartbeat;

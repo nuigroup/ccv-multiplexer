@@ -22,7 +22,7 @@ void syncserver::setup(string _fileString) {
 		//c.name = "noname";
 		connections.push_back(c);
 	}
-  }
+}
 
 void syncserver::loadIniFile(string _fileString) {
 	out("Loading settings from file " + _fileString);
@@ -33,17 +33,13 @@ void syncserver::loadIniFile(string _fileString) {
 	else
 		out("Xml Loaded successfully");
 
-    // parse INI file
-   // fps   = xmlReader.getValue("settings:server:framerate", 5, 0);
     fps=xmlReader.getValue("settings:fps", 5, 0);
 	serverInPort = xmlReader.getValue("settings:serverinport", 11999, 0);
 	serverOutPort = xmlReader.getValue("settings:serveroutport",11998,0);
 	numExpectedClients        = xmlReader.getValue("settings:numclients", 1, 0);
 	broadcast = xmlReader.getValue("settings:broadcast", "192.168.1.255", 0);
 	bTCP = xmlReader.getValue("settings:protocol","UDP") == "TCP";
-
-	//if (xmlReader.getValue("settings:debug", 0, 0) == 1) 
-//        DEBUG = true;
+	i=numExpectedClients;
 
     out("XML Settings: fps = " + ofToString(fps) + ", Number of Client = " + ofToString(numExpectedClients));
 	
@@ -54,8 +50,7 @@ void syncserver::out(string _str) {
 }
 
 void syncserver::print(string _str) {
-//    if (DEBUG)
-        cout << "syncServer: " << _str << endl;
+    cout << "syncServer: " << _str << endl;
 }
 
 void syncserver::err(string _str) {
@@ -63,8 +58,6 @@ void syncserver::err(string _str) {
 }
 
 void syncserver::start() {
-//    tcpClient.setVerbose(DEBUG);
-
 	if(bTCP)
 	{
 		if(!tcpServer.setup(serverInPort, false)){
@@ -99,103 +92,95 @@ void syncserver::threadedFunction() {
     out("Running!");
         
     while (isThreadRunning()) {
-		if (lock()) {
-			//shouldTriggerFrame=true;
-			if(shouldTriggerFrame){
-				float now = ofGetElapsedTimef();
-				float elapsed = (now - lastFrameTriggeredTime);
+				if(shouldTriggerFrame){
+					lock();
+					float now = ofGetElapsedTimef();
+					float elapsed = (now - lastFrameTriggeredTime);
 
-				if(elapsed >= 1.0/fps){
-					
-					string message = "G,"+ofToString(currentFrame);
-					if (newMessage){
-						message += currentMessage;
-						newMessage = false;
-						currentMessage = "";
-					}
-
-					send(message);
-					shouldTriggerFrame = false;
-					lastFrameTriggeredTime = now;
-					currentFrame++;
-				}
-			}
-
-			else {
-				//lock();
-
-			/*	bool lostConnection = false;
-				for(int c = 0; c < numExpectedClients; c++){
-					if(connections[c].started && !server.isClientConnected(connections[c].tcpServerIndex)){
-						connections[c].started = false;
-						lostConnection = true;
-					}
-				}*/
-
-
-				if(bTCP){
-					for(int i = 0; i < tcpServer.getLastID(); i++){
-						if(tcpServer.isClientConnected(i)){
-							string response = tcpServer.receive(i);
-							if (response.length() > 0) {
-								read(response,i);
+					if(elapsed >= 1.0/fps){
+							string message = "G,"+ofToString(currentFrame);
+							if (newMessage){
+								message += currentMessage;
+								newMessage = false;
+								currentMessage = "";
 							}
+
+							send(message);
+							shouldTriggerFrame = false;
+							lastFrameTriggeredTime = now;
+						currentFrame++;
+						i=numExpectedClients;
+					}
+					unlock();
+				}
+
+				else {
+					lock();
+					if(bTCP){
+						for(int i = 0; i < tcpServer.getLastID(); i++){
+							if(tcpServer.isClientConnected(i)){
+								string response = tcpServer.receive(i);
+									if (response.length() > 0) {
+										read(response,i);
+									}
+							}
+							else
+								tcpServer.disconnectClient(i);
+
+						}
+					}
+				
+					else{
+						char udpMessage[10];
+						udpReceiver.Receive(udpMessage,10);
+						string response = udpMessage;
+						//out(response);
+						if (response.length() > 0) {
+							read(response);
 						}	
 					}
+					unlock();
+					ofSleepMillis(5);
 				}
-				
-				else{
-					char udpMessage[10];
-					udpReceiver.Receive(udpMessage,10);
-					string response = udpMessage;
-					//out(response);
-					if (response.length() > 0) {
-						read(response);
-					}	
-				}
-				
-				if(shouldContinue){
-					if(!allconnected){
-						allconnected = true;
-						for(int c = 0; c < connections.size(); c++){
-							if(!connections[c].started){
-							allconnected = false;
-							break;
-							}
-						}
-						if(allconnected){
-							shouldTriggerFrame = true;
-							cout << "All clients connected!" << endl;
-						}
-						
-					}
-					
-					//All connected and going
-					else {
-						bool allready = true;
-						for(int c = 0; c < connections.size(); c++){
-						if(!connections[c].ready){
-							allready = false;
-							break;
-						}
-						
-					}
-					if(allready){
-						shouldTriggerFrame = true;
-					}
-					}
-					shouldContinue=false;
-				}
-				//unlock();
-				//ofSleepMillis(5);
-			}
 			
-		
-			unlock();
-			ofSleepMillis(5);
-		}
 	}
 }
+
+
+void syncserver::shouldContinue(){
+	i--;
+	if(!allconnected){
+		allconnected = true;
+		for(int c = 0; c < connections.size(); c++){
+			if(!connections[c].started){
+			allconnected = false;
+			break;
+			}
+		}
+		if(allconnected){
+			shouldTriggerFrame = true;
+		}
+						
+	}
+					
+					//All connected and going
+	else {
+		
+		bool allready = true;
+		for(int c = 0; c < connections.size(); c++){
+			if(!connections[c].ready){
+				allready = false;
+				break;
+			}
+						
+		}
+		if(allready && (i==0)){
+			shouldTriggerFrame = true;
+		}
+	}
+				//	shouldContinue=false;
+} //should continue loops end
+
 
 void syncserver::read(string response) {
 	out("Receiving: " + response);
@@ -209,7 +194,7 @@ void syncserver::read(string response) {
 					connections[clientID].started = true;
 //					connections[clientID].name = info[1];
 					cout << "Client ID " << clientID << " with response " << response << endl;
-					shouldContinue =true;
+					shouldContinue();
 				}
 			else{
 					err("Received Client ID " + ofToString(clientID)  + " out of range");
@@ -220,11 +205,11 @@ void syncserver::read(string response) {
 			if(info.size() >= 3){
 				int clientID = ofToInt(info[1]);
 				int fc = ofToInt(info[2]);
-				if(fc == currentFrame){
+				if(fc == currentFrame-1){
+
 					//todo validate client id
 					connections[clientID].ready = true;
-					//cout << " client " << clientID << " is ready " << endl
-					shouldContinue =true;
+					shouldContinue();
 				}
 				
 			}
@@ -233,19 +218,18 @@ void syncserver::read(string response) {
 		int clientID = ofToInt(response.substr(1,1));
 		connections[clientID].started = false;
 		connections[clientID].ready = false;
-		setDefaults();
-		//allConnected = false
-		//currentFrame=0;
-		//shouldTriggerFrame=false;
-		//ofSleepMillis(5);
-		
+		allconnected = false;
+			//numConnectedClients = 0;
+			currentFrame = 0;
+			shouldTriggerFrame = false;
+		//setDefaults();
+				
 	}
-	
-	
 	
 }
 
 void syncserver::read(string response,int i) {
+	
 	out("Receiving: " + response);
 	char first = response.at(0);
 	if(first == 'S'){
@@ -257,23 +241,25 @@ void syncserver::read(string response,int i) {
 					connections[clientID].started = true;
 //					connections[clientID].name = info[1];
 					cout << "Client ID " << clientID << " with response " << response << endl;
-					shouldContinue =true;
+					shouldContinue();
 				}
 			else{
 					err("Received Client ID " + ofToString(clientID)  + " out of range");
 				}
 	}
 	else if(first == 'D'){
+	
 			vector<string> info = ofSplitString(response, ",");
 			if(info.size() >= 3){
 				int clientID = ofToInt(info[1]);
 				int fc = ofToInt(info[2]);
-				if(fc == currentFrame){
-					//todo validate client id
+				if(fc == currentFrame-1){
+				   	//todo validate client id
 					connections[clientID].ready = true;
-					shouldContinue =true;
-					//cout << " client " << clientID << " is ready " << endl;
+					shouldContinue();
 				}
+				else
+					out("here is the error");
 						
 			}
 	}
@@ -293,11 +279,6 @@ void syncserver::read(string response,int i) {
 		}
 		//send("X");
 		setDefaults();
-		cout<<"Waiting.";
-		//for(int i=0;i<500;i++){
-			//ofSleepMillis(5);
-			//cout<<".";
-		//}
 		restartServer();
 	}
 	else{
@@ -308,9 +289,7 @@ void syncserver::read(string response,int i) {
 
 void syncserver::send(string _msg) {
     out("Sending: " + _msg);
-   // _msg += "\n";
-
-	if(bTCP)
+   	if(bTCP)
 	{
 		if(allconnected)
 		tcpServer.sendToAll(_msg);
@@ -340,10 +319,3 @@ void syncserver::restartServer(){
 	start();
 	out("TCP Server Restart Complete!!!");
 }
-
-
-
-
-
-
-
