@@ -8,6 +8,7 @@
 #ifndef OFXMULTIPLEXERMANAGER_H_INCLUDED
 #define OFXMULTIPLEXERMANAGER_H_INCLUDED
 
+#include "ofxIPImage.h"
 #include "ofxCameraBase.h"
 #include "ofxCameraBaseSettings.h"
 #include "ofxffmv.h"
@@ -15,11 +16,13 @@
 #include "ofxDShow.h"
 #include "ofxKinect.h"
 #include "ofxCMUCamera.h"
+
 #include "ofxMultiplexer.h"
 #include "ofxXMLSettings.h"
 #include <vector>
 #include "Filters\Filters.h"
 #include "Calibration.h"
+
 
 
 class ofxMultiplexerManager

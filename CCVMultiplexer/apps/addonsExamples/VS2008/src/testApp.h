@@ -2,21 +2,32 @@
 #define _TEST_APP
 
 //if standalone mode/non-addon
-//#define STANDALONE
+#define STANDALONE
 
 //main
 #include "ofMain.h"
 //addon
-//#include "ofxNCore.h"
-#include "syncServer.h"
+#include "ofxNCore.h"
 
-class testApp : public ofBaseApp
+class testApp : public ofBaseApp, public TouchListener
 {
 public:
-	
-	
+	testApp(int argc, char *argv[]) 
+	{
+		debug = false;
+		TouchEvents.addListener(this);
+		if(argc==2)
+		{
+			printf("Command Line Option Passed : %s\n",argv[1]);
+			if(strcmp(argv[1],"-d")==0)
+			{
+				debug = true;
+			}
+		}
+	}
+	ofxNCoreVision * ccv;
 	bool debug;
-	syncserver ccvm;
+
 	void setup();
 	void update();
 	void draw();
@@ -29,9 +40,9 @@ public:
 	void mouseReleased();
 
 	//Touch Events
-	//void TouchDown(Blob b);
-	//void TouchMoved(Blob b);
-	//void TouchUp(Blob b);
+	void TouchDown(Blob b);
+	void TouchMoved(Blob b);
+	void TouchUp(Blob b);
 };
 
 #endif

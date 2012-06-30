@@ -64,13 +64,15 @@ UDP Multicast (receiving):
 x) Close()
 
 --------------------------------------------------------------------------------*/
+
 #include "ofConstants.h"
 #include <string.h>
 #include <wchar.h>
 #include <stdio.h>
 
-#ifndef TARGET_WIN32
 
+
+#ifndef TARGET_WIN32
 	//unix includes - works for osx should be same for *nix
 	#include <ctype.h>
 	#include <netdb.h>

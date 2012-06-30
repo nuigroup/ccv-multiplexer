@@ -16,14 +16,16 @@
 *****************************************************************************/
 void ofxNCoreVision::_setup(ofEventArgs &e)
 {
+	
 	//set the title
-	ofSetWindowTitle("Community Core Vision - 1.5");
+	ofSetWindowTitle("Community Core Vision Multiplexer");
 	//create filter
 	if(filter == NULL)	filter = new ProcessFilters();
-//	if ( filter_fiducial == NULL ){filter_fiducial = new ProcessFilters();}
+	//if ( filter_fiducial == NULL ){filter_fiducial = new ProcessFilters();}
 	if ( filter_fiducial == NULL ){filter_fiducial = new ProcessFiducialFilters();}
 
-
+	ccvm.setup("xml/TCPSyncServer.xml");
+	ccvm.start();
 	//Load Settings from config file
 	loadXMLSettings();
 
@@ -139,7 +141,7 @@ void ofxNCoreVision::_setup(ofEventArgs &e)
 
 	#ifdef TARGET_WIN32
 		//get rid of the console window
-		FreeConsole();
+		//FreeConsole();
 	#endif
 
 
@@ -181,6 +183,8 @@ void ofxNCoreVision::loadXMLSettings()
 		supportedCameraTypes.push_back(KINECT);
 	if (XML.getValue("CONFIG:MULTIPLEXER:CAMERATYPES:DIRECTSHOW", 0))
 		supportedCameraTypes.push_back(DIRECTSHOW);
+	if (XML.getValue("CONFIG:MULTIPLEXER:CAMERATYPES:IPIMAGE", 0))
+		supportedCameraTypes.push_back(IPIMAGE);
 	videoFileName				= XML.getValue("CONFIG:VIDEO:FILENAME", "test_videos/RearDI.m4v");
 	bcamera						= XML.getValue("CONFIG:SOURCE","VIDEO") == "MULTIPLEXER";
 	maxBlobs					= XML.getValue("CONFIG:BLOBS:MAXNUMBER", 20);
@@ -224,6 +228,9 @@ void ofxNCoreVision::loadXMLSettings()
 	contourFinder.bTrackFingers				= XML.getValue("CONFIG:BOOLEAN:TRACKFINGERS",0);
 	contourFinder.bTrackObjects				= XML.getValue("CONFIG:BOOLEAN:TRACKOBJECTS",0);
 	contourFinder.bTrackFiducials			= XML.getValue("CONFIG:BOOLEAN:TRACKFIDUCIALS",0);
+
+	//TCPSync Option
+	//bTCPSync					= XML.getValue("CONFIG:BOOLEAN:TCPSYNC", 0);
 
 	//NETWORK SETTINGS
 	bTUIOMode					= XML.getValue("CONFIG:BOOLEAN:TUIO",0);
@@ -294,6 +301,14 @@ void ofxNCoreVision::saveSettings()
 			break;
 		}
 	XML.setValue("CONFIG:MULTIPLEXER:CAMERATYPES:DIRECTSHOW", isSupported);
+	isSupported = 0;
+	for (int i=0;i<supportedCameraTypes.size();i++)
+		if (supportedCameraTypes[i] == IPIMAGE)
+		{
+			isSupported = 1;
+			break;
+		}
+	XML.setValue("CONFIG:MULTIPLEXER:CAMERATYPES:IPIMAGE", isSupported);
 	XML.setValue("CONFIG:SOURCE", bcamera ? "MULTIPLEXER" : "VIDEO");
 	XML.setValue("CONFIG:BOOLEAN:PRESSURE",bShowPressure);
 	XML.setValue("CONFIG:BOOLEAN:LABELS",bShowLabels);
@@ -353,10 +368,10 @@ void ofxNCoreVision::initDevice()
 			multiplexerManager->addAllowdedCameraType(supportedCameraTypes[i]);
 		}
 		multiplexer = new ofxMultiplexer();
-		multiplexerManager->setMultiplexerSize(camWidth,camHeight);
-		multiplexerManager->setCalibrator(&calib);
-		multiplexerManager->setProcessFilter(filter);
-		multiplexerManager->setMultiplexer(multiplexer);
+		multiplexerManager->setMultiplexerSize(camWidth,camHeight);  //h,w=320,240, stitched frame also the same
+		multiplexerManager->setCalibrator(&calib); //passing the calib instance
+		multiplexerManager->setProcessFilter(filter); //no need of filters in CCVM
+		multiplexerManager->setMultiplexer(multiplexer); // passing multiplexer
 		multiplexerManager->startMulticamManager();
 		interleaveMode = multiplexerManager->getInterleaveMode();
 		#endif
@@ -381,6 +396,7 @@ void ofxNCoreVision::initDevice()
 *****************************************************************************/
 void ofxNCoreVision::_update(ofEventArgs &e)
 {
+	
 	if(debugMode) if((stream = freopen(fileName, "a", stdout)) == NULL){}
 
 	bNewFrame = false;
@@ -1071,7 +1087,14 @@ void ofxNCoreVision::_keyReleased(ofKeyEventArgs &e)
 		{
 			if (!bcamera)
 				return;
-			ofSetFrameRate(40);	//BUG : when framerate is high - calibration is not stable		
+			ofSetFrameRate(40);	//BUG : when framerate is high - calibration is not stable
+
+			//added by pratik9891
+			string message = "C";
+			ccvm.send(message);
+//			ofSleepMills(400);
+
+
 			bShowInterface = false;
 			// Enter/Exit Calibration
 			bCalibration = true;

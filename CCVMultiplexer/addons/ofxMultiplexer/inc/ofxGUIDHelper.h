@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#define _WINSOCKAPI_ 
 #include <windows.h>
 #include <conio.h>
 

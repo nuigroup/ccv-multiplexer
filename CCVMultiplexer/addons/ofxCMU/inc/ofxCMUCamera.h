@@ -11,6 +11,7 @@
 #ifndef _OFX_CMU_CAMERA_
 #define _OFX_CMU_CAMERA_
 
+#define _WINSOCKAPI_ 
 #include <windows.h>
 #include <process.h>
 #include <mmsystem.h>

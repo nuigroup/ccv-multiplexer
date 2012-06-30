@@ -2,6 +2,23 @@
     <CAMERA>
         <SETTINGS>
             <GUID>0</GUID>
+            <TYPE>IPIMAGE</TYPE>
+            <FRAME>
+                <RAW>0</RAW>
+                <WIDTH>320</WIDTH>
+                <HEIGHT>240</HEIGHT>
+                <LEFT>0</LEFT>
+                <TOP>0</TOP>
+            </FRAME>
+            <SENSOR>
+                <MODE>0</MODE>
+                <DEPTH>3</DEPTH>
+            </SENSOR>
+        </SETTINGS>
+    </CAMERA>
+    <CAMERA>
+        <SETTINGS>
+            <GUID>0</GUID>
             <TYPE>DIRECTSHOW</TYPE>
             <FRAME>
                 <RAW>0</RAW>
@@ -22,7 +39,7 @@
                     <AUTO>0</AUTO>
                 </CONTRAST>
                 <GAIN>
-                    <VALUE>1</VALUE>
+                    <VALUE>33</VALUE>
                     <AUTO>0</AUTO>
                 </GAIN>
                 <SATURATION>
@@ -34,7 +51,7 @@
                     <AUTO>0</AUTO>
                 </SHARPNESS>
                 <EXPOSURE>
-                    <VALUE>-6</VALUE>
+                    <VALUE>-7</VALUE>
                     <AUTO>1</AUTO>
                 </EXPOSURE>
                 <FRAMERATE>15</FRAMERATE>

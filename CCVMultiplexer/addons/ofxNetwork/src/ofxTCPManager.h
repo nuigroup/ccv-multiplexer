@@ -50,6 +50,7 @@ SetTimeoutReceive()
 #include <stdio.h>
 
 #ifndef TARGET_WIN32
+
 	//unix includes - works for osx should be same for *nix
 	#include <ctype.h>
 	#include <netdb.h>
@@ -72,7 +73,7 @@ SetTimeoutReceive()
 	#include <signal.h>
 #endif
 
-	//other types
+//other types
 	#define INVALID_SOCKET -1
 	#define SOCKET_ERROR -1
 	#define FAR

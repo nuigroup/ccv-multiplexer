@@ -81,7 +81,7 @@ class ofxDirList{
  */
 
 #ifdef TARGET_WIN32
-
+	#define _WINSOCKAPI_ 
 	#include <windows.h>
 	#include <tchar.h>
 	#include <string.h>

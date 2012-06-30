@@ -1,6 +1,7 @@
 #include "syncserver.h"
 
 syncserver::syncserver() {
+//	fbo.allocate(320,240);
     setDefaults(); 
 }
 
@@ -19,9 +20,18 @@ void syncserver::setup(string _fileString) {
 		Connection c;
 		c.started = false;
 		c.ready = false;
+		c.height =240;
+		c.width = 320;
+		c.depth =1;
+		c.serverIndex = i;
 		//c.name = "noname";
 		connections.push_back(c);
 	}
+
+	blackPixels			= new unsigned char [320* 240];
+	for (int j = 0; j < 320*240; j++){
+			blackPixels[j] = (unsigned char)(255);
+		}
 }
 
 void syncserver::loadIniFile(string _fileString) {
@@ -58,6 +68,9 @@ void syncserver::err(string _str) {
 }
 
 void syncserver::start() {
+	//tuioclient.connect(3333);
+	//this->addTuioListener(this);
+	
 	if(bTCP)
 	{
 		if(!tcpServer.setup(serverInPort, false)){
@@ -100,7 +113,7 @@ void syncserver::threadedFunction() {
 					if(elapsed >= 1.0/fps){
 							string message = "G,"+ofToString(currentFrame);
 							if (newMessage){
-								message += currentMessage;
+								message += ","+currentMessage;
 								newMessage = false;
 								currentMessage = "";
 							}
@@ -237,9 +250,10 @@ void syncserver::read(string response,int i) {
 			int clientID = ofToInt(response.substr(1,1));
 			if(clientID < numExpectedClients){
 					vector<string> info = ofSplitString(response, ",");
-					connections[clientID].tcpServerIndex = i;
+					connections[clientID].serverIndex = i;
 					connections[clientID].started = true;
 //					connections[clientID].name = info[1];
+					numConnectedClients++;
 					cout << "Client ID " << clientID << " with response " << response << endl;
 					shouldContinue();
 				}
@@ -263,6 +277,19 @@ void syncserver::read(string response,int i) {
 						
 			}
 	}
+	else if(first == 'F'){
+		vector<string> strEntries = ofSplitString(response,"[/p]");
+		int clientID = ofToInt(response.substr(1,1));
+		for(int i=1;i<strEntries.size();i++){
+			vector<string> entry = ofSplitString(strEntries[i],"|");
+			ofPoint temp;
+			temp.x = atof(entry[0].c_str());
+			temp.y = atof(entry[1].c_str());
+			connections[clientID].points.push_back(temp);
+		}
+	}
+		
+
 	else if(first == 'X'){
 
 		
@@ -287,6 +314,14 @@ void syncserver::read(string response,int i) {
 	}
 }
 
+void getCalibData()
+{
+	string mesg;
+	mesg = "C";
+	//send(message);
+	//send(mesg);	
+}
+
 void syncserver::send(string _msg) {
     out("Sending: " + _msg);
    	if(bTCP)
@@ -300,6 +335,7 @@ void syncserver::send(string _msg) {
 
 void syncserver::quit() {
     out("Quitting.");
+//	tuioclient.disconnect();
 	if(bTCP){
 		tcpServer.close();
 	}
@@ -319,3 +355,76 @@ void syncserver::restartServer(){
 	start();
 	out("TCP Server Restart Complete!!!");
 }
+
+
+/*void syncserver::initimage(){
+	
+	for(int i = 0; i < numExpectedClients; i++){
+	//	connections[i].blobImage.allocate(width, height); //main Image that'll be processed.
+	//	connections[i].blackImage.allocate(width, height);
+	//	connections[i].blobImageBw.allocate(width, height);
+	//	connections[i].testImage.allocate(width, height,OF_IMAGE_GRAYSCALE);
+		connections[i].blackPixels			= new unsigned char [width* height];
+
+		// black pixels
+		for (int j = 0; j < width*height; j++){
+			connections[i].blackPixels[j] = (unsigned char)(0);
+		}
+	
+		connections[i].blackImage.setFromPixels(blackPixels,width, height);
+	}
+}*/
+
+
+void syncserver::getPixels(int id, unsigned char *newFrame)
+{
+	int ID=id;
+	cout<<"\n*****************getpixels called*********************\n";
+	//for (int j = 0; j < 320*240; j++){
+	//		connections[i].blackPixels[j] = (unsigned char)(255);
+	//	}
+	//ofImage test;
+	//test.allocate(320,240);
+	//memcpy((unsigned char*)newFrame,(unsigned char*)connections[i].blackPixels,320 * 240 * 1 * sizeof(unsigned char));
+	//ofxFBOTexture* myfbo = new ofxFBOTexture;
+	//myfbo->allocate(320,240);
+	//myfbo->begin();
+	//myfbo->clear();
+	//ofSetColor(0);
+	//myFBO.begin();
+	//ofSetColor(100, 0,0);
+	//ofRect(0,0,320,240);
+	//ofSetColor(255,0,0);
+	//ofCircle(50,50,20);
+	//ofLine(10,10,50,50);
+	//ofRect(0,0,320,240);
+	//ofSetColor(1);
+	//for(std::vector<ofPoint>::iterator it = connections[ID].points.begin();it != connections[ID].points.end();it++)
+	//{
+		//ofCircle( (*it).x * connections[ID].width, (*it).y*connections[ID].height, 10);
+
+	//}
+	//myFBO.end();
+	//myFBO.draw(5,4,320,240);
+	//unsigned char * depth = (unsigned char*)myFBO.getPixels();
+	/*for (int k = 0; k < 320; k++){
+		for (int j = 0; j < 240; j++){
+			int value = depth[j * 320 +k];
+			cout<<value<<" ";
+		}
+	}
+	*/
+
+	//memcpy((unsigned char*)pixels,(unsigned char*)myfbo->getPixels(),320 * 240 * 1 * sizeof(unsigned char));
+	
+	//myfbo->end();
+	//connections[ID].points.clear();
+	//delete myfbo;
+
+	//fbo.allocate(320,240);
+	//fbo.begin();
+	//	ofCircle(10,10,50);
+	//fbo.end();
+
+}
+

@@ -587,8 +587,10 @@ void ofxNCoreVision ::handleGui(int parameterId, int task, void* data, int lengt
 			}
 			break;
 		case generalSettingsPanel_apply_settings:
-			if (bcamera)
+			if (bcamera){
 				multiplexerManager->applySettingsToMultiplexer();
+				multiplexerManager->saveSettingsToXML();
+			}
 			break;
 		case devicesListPanel_arrow_left:
 			if ( length == sizeof(bool) ) 

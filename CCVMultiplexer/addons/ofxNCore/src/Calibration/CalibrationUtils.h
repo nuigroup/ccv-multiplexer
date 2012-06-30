@@ -14,6 +14,7 @@
 //Used other calibration
 #include "rect2d.h"
 #include "vector2d.h"
+#define _WINSOCKAPI_ 
 #include "windows.h"
 #include "memory.h"
 #include "ofMain.h"

@@ -16,6 +16,7 @@
 #include <memory.h>
 #include <vector>
 #include "omp.h"
+#include "ofxIPImage.h"
 #include "ofxCameraBase.h"
 #include "ofxCameraBaseSettings.h"
 #include "ofxffmv.h"
@@ -23,6 +24,7 @@
 #include "ofxDShow.h"
 #include "ofxKinect.h"
 #include "ofxCMUCamera.h"
+
 #include "ofxGUIDHelper.h"
 #include "ofxXMLSettings.h"
 #include "Calibration.h"

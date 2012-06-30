@@ -1,17 +1,17 @@
 <MULTIPLEXER>
     <CAMERAGRID>
-        <WIDTH>1</WIDTH>
+        <WIDTH>2</WIDTH>
         <HEIGHT>1</HEIGHT>
     </CAMERAGRID>
     <CALIBRATIONGRID>
         <WIDTH>3</WIDTH>
         <HEIGHT>3</HEIGHT>
     </CALIBRATIONGRID>
-    <INTERLEAVE>1</INTERLEAVE>
+    <INTERLEAVE>0</INTERLEAVE>
     <CAMERAS>
         <CAMERA>
             <GUID>0</GUID>
-            <TYPE>DIRECTSHOW</TYPE>
+            <TYPE>IPIMAGE</TYPE>
             <INDEX>0</INDEX>
             <POINTARRAY>
                 <POINT>

@@ -12,6 +12,7 @@
 #define _MAX_CAMERAS_ 16
 #define _MAX_FRAME_LIFETIME_ 3
 
+#define _WINSOCKAPI_ 
 #include <windows.h>
 #include "ofxCameraBaseSettings.h"
 #include "ofMain.h"

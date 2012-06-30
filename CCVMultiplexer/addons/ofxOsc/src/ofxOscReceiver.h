@@ -35,6 +35,7 @@
 
 #ifdef TARGET_WIN32
 // threads
+#define _WINSOCKAPI_ 
 #include <windows.h>
 #else
 // threads

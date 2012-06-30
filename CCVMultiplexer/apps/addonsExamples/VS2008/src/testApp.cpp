@@ -4,13 +4,12 @@
 //--------------------------------------------------------------
 void testApp::setup()
 {
-	ofSetFrameRate(60);
-	ccvm.setup("xml/TCPSyncServer.xml");
-	ccvm.start();
+	ccv = new ofxNCoreVision(debug);
 }
 
 //--------------------------------------------------------------
-void testApp::update(){}
+void testApp::update(){
+}
 
 //--------------------------------------------------------------
 void testApp::draw()
@@ -38,10 +37,10 @@ void testApp::mouseReleased(){}
 /*****************************************************************************
  *	TOUCH EVENTS
  *****************************************************************************/
-//void testApp::TouchDown(Blob b){}
+void testApp::TouchDown(Blob b){}
 
-//void testApp::TouchUp(Blob b){}
+void testApp::TouchUp(Blob b){}
 
-//void testApp::TouchMoved( Blob b){}
+void testApp::TouchMoved( Blob b){}
 
 

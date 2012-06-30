@@ -14,6 +14,7 @@
 
 #include "ofxCameraBase.h"
 #include "CLEyeMulticam.h"
+#define _WINSOCKAPI_ 
 #include  <windows.h>
 #include  <commctrl.h>
 

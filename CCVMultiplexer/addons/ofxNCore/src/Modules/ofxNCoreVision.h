@@ -25,6 +25,9 @@
 #include "ofxThread.h"
 #include "ofxXmlSettings.h"
 #include "ofxFiducialTracker.h"
+#include "syncserver.h"
+#include "ofxFBOTexture.h"
+
 
 // Our Addon
 #include "ofxNCore.h"
@@ -242,7 +245,7 @@ public:
             bStandaloneMode = false;
         #endif
 			capturedData = NULL;
-		bMultiCamsInterface = false;
+		bMultiCamsInterface = true;
 		camsGrid = NULL;
 		devGrid = NULL;
 		draggingImage = NULL;
@@ -260,7 +263,9 @@ public:
 		// C++ guarantees that operator delete checks its argument for null-ness
 		delete filter;		filter = NULL;
 		delete filter_fiducial;		filter_fiducial = NULL;
+		if (bcamera){
 		delete multiplexer;		multiplexer = NULL;
+		}
 	}
 
 	/****************************************************************
@@ -279,6 +284,15 @@ public:
     //Key Events
     void _keyPressed(ofKeyEventArgs &e);
     void _keyReleased(ofKeyEventArgs &e);
+
+	//Tuio events
+//	void objectAdded(TuioObject & tuioObject);
+//	void objectRemoved(TuioObject & tuioObject);
+//	void objectUpdated(TuioObject & tuioObject);
+
+//	void tuioAdded(TuioCursor & tuioCursor);
+//	void tuioRemoved(TuioCursor & tuioCursor);
+//	void tuioUpdated(TuioCursor & tuioCursor);
 
 	//GUI
 	void setupControls();
@@ -470,5 +484,8 @@ public:
 	float draggingXOffset;
 	float draggingYOffset;
 	int rawCamId;
+
+	syncserver ccvm;
+	
 };
 #endif
