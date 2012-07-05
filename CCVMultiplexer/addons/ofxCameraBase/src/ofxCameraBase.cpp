@@ -22,7 +22,7 @@ DWORD WINAPI ofxCameraBase::CaptureThread(LPVOID instance)
 
 void ofxCameraBase::StartThreadingCapture()
 {
-	InitializeCriticalSection(&criticalSection); 
+	 
 	isCaptureThreadRunning = true;
 	captureThread = CreateThread(NULL, 0, &ofxCameraBase::CaptureThread, this, 0, 0);
 }
@@ -109,7 +109,9 @@ void ofxCameraBase::deinitializeCamera()
 
 void ofxCameraBase::updateCurrentFrame()
 {
+	
 	getNewFrame(depth>1 ? rawCameraFrame : cameraFrame);
+	
 	if (depth>1)
 	{
 		int size = width*height;
@@ -257,6 +259,7 @@ void ofxCameraBase::updateCurrentFrame()
 		}
 	}
 }
+
 
 void ofxCameraBase::loadCameraSettings(ofxXmlSettings* xmlSettings)
 {
@@ -1016,4 +1019,391 @@ void ofxCameraBase::saveCameraSettings()
 	xmlSettings->saveFile(fileName);
 	delete xmlSettings;
 	xmlSettings = NULL;
+}
+
+
+
+
+
+void ofxCameraBase::serverSetup(string _fileString){
+	loadServerSettings(_fileString);
+	setDefaults();
+	if(bTCP)
+	{}
+	else
+	{
+		udpReceiver.Create();
+		udpSender.Create();
+		udpReceiver.SetReuseAddress(true);
+		udpSender.SetReuseAddress(true);
+	}
+	for(int i = 0; i < numExpectedClients; i++){
+		
+		connection * c =new connection ;
+		c->started = false;
+		c->ready = false;
+		c->height =240;
+		c->width = 320;
+		c->depth =3;
+		c->serverIndex = i;
+		c->blobImage.allocate(320,240);
+		//c->name = "noname";
+		c->test=false;
+		connections.push_back(c);
+		
+	}
+	
+}
+
+void ofxCameraBase::loadServerSettings(string _fileString){
+	ofxXmlSettings* xmlReader = new ofxXmlSettings();
+	 if (!xmlReader->loadFile(_fileString)) 
+        err("ERROR loading XML file!");
+	else
+		out("Xml Loaded successfully");
+
+	 
+    fps=xmlReader->getValue("settings:fps", 5, 0);
+	serverInPort = xmlReader->getValue("settings:serverinport", 11999, 0);
+	serverOutPort = xmlReader->getValue("settings:serveroutport",11998,0);
+	numExpectedClients = xmlReader->getValue("settings:numclients", 1, 0);
+	broadcast = xmlReader->getValue("settings:broadcast", "192.168.1.255", 0);
+	bTCP = xmlReader->getValue("settings:protocol","UDP") == "TCP";
+	i=numExpectedClients;
+
+    out("XML Settings: fps = " + ofToString(fps) + ", Number of Client = " + ofToString(numExpectedClients));
+	delete xmlReader;
+	xmlReader = NULL;
+}
+
+
+
+
+
+void ofxCameraBase::out(string _str) {
+    print(_str);
+}
+
+void ofxCameraBase::print(string _str) {
+    cout << "syncServer: " << _str << endl;
+}
+
+void ofxCameraBase::err(string _str) {
+    cerr << "syncServer error: " << _str << endl;
+}
+
+
+void ofxCameraBase::startServer(){
+	if(bTCP)
+	{
+		if(!tcpServer.setup(serverInPort, false)){
+			err("TCP Serever :: Setup failed");
+			return;
+		}
+		else
+			out("TCP Server setup on::" +ofToString(serverInPort));
+	}
+	else
+	{
+	udpSender.SetEnableBroadcast(true);
+	udpSender.SetReuseAddress(true);
+	udpReceiver.SetReuseAddress(true);
+		if(!udpReceiver.Bind(serverInPort)){
+			err("UDP In Server :: Setup failed");
+			return;
+		}
+		else if(!udpSender.Connect("192.168.1.255",serverOutPort)){
+			err("UDP Out Server :: Setup Failed");
+			return;
+		}
+		else{
+			out("UDP Input Server setup on::" +ofToString(serverInPort));
+			out("UDP Output Server setup on::" +ofToString(serverOutPort));
+		}
+	}
+
+	InitializeCriticalSection(&criticalSection);
+	isServerThreadRunning =true;
+	captureThread = CreateThread(NULL, 0, &ofxCameraBase::ServerThread, this, 0, 0);
+}
+
+DWORD WINAPI ofxCameraBase::ServerThread(LPVOID instance)
+{
+	ofxCameraBase *pThis = (ofxCameraBase*)instance;
+	pThis->Server();
+	return 0;
+}
+
+void ofxCameraBase::Server(){
+	out("Running!");
+        
+	while (isServerThreadRunning) {
+		EnterCriticalSection(&criticalSection);
+			cout<<"SYNCSERVER VALUE OF TEST"<<connections[0]->started<<endl;
+			connections[0]->started=true;
+		LeaveCriticalSection(&criticalSection);
+		if(shouldTriggerFrame){
+						
+					float now = ofGetElapsedTimef();
+					float elapsed = (now - lastFrameTriggeredTime);
+					
+					if(elapsed >= 1.0/fps){
+							string message = "G,"+ofToString(currentFrame);
+							if (newMessage){
+								message += ","+currentMessage;
+								newMessage = false;
+								currentMessage = "";
+							}
+
+							send(message);
+							shouldTriggerFrame = false;
+							lastFrameTriggeredTime = now;
+						currentFrame++;
+						i=numExpectedClients;
+					}
+					
+		}
+		
+		
+		else {
+						
+			
+					if(bTCP){
+						for(int i = 0; i < tcpServer.getLastID(); i++){
+							if(tcpServer.isClientConnected(i)){
+								string response = tcpServer.receive(i);
+									if (response.length() > 0) {
+										read(response,i);
+										
+									}
+							}
+							else
+								tcpServer.disconnectClient(i);
+
+						}
+					}
+				
+					else{
+						char udpMessage[10];
+						udpReceiver.Receive(udpMessage,10);
+						string response = udpMessage;
+						//out(response);
+						if (response.length() > 0) {
+							read(response);
+						}	
+					}
+		}
+					
+			
+		
+	ofSleepMillis(50);
+	}
+}
+
+void ofxCameraBase::shouldContinue(){
+	i--;
+	if(!allconnected){
+		allconnected = true;
+		EnterCriticalSection(&criticalSection);
+		for(int c = 0; c < connections.size(); c++){
+			if(!connections[c]->started){
+			allconnected = false;
+			break;
+			}
+		}
+		LeaveCriticalSection(&criticalSection);
+		if(allconnected){
+			shouldTriggerFrame = true;
+		}
+						
+	}
+					
+					//All connected and going
+	else {
+		
+		bool allready = true;
+		EnterCriticalSection(&criticalSection);
+		for(int c = 0; c < connections.size(); c++){
+			if(!connections[c]->ready){
+				allready = false;
+				break;
+			}
+						
+		}
+		LeaveCriticalSection(&criticalSection);
+		if(allready && (i==0)){
+			shouldTriggerFrame = true;
+		}
+	}
+				//	shouldContinue=false;
+}
+
+void ofxCameraBase::read(string response) {
+	out("Receiving: " + response);
+	char first = response.at(0);
+	if(first == 'S'){
+					//this is where it starts!
+			int clientID = ofToInt(response.substr(1,1));
+			if(clientID < numExpectedClients){
+					vector<string> info = ofSplitString(response, ",");
+					//connections[clientID].tcpServerIndex = i;
+					connections[clientID]->started = true;
+//					connections[clientID].name = info[1];
+					cout << "Client ID " << clientID << " with response " << response << endl;
+					shouldContinue();
+				}
+			else{
+					err("Received Client ID " + ofToString(clientID)  + " out of range");
+				}
+	}
+	else if(first == 'D'){
+			vector<string> info = ofSplitString(response, ",");
+			if(info.size() >= 3){
+				int clientID = ofToInt(info[1]);
+				int fc = ofToInt(info[2]);
+				if(fc == currentFrame-1){
+
+					//todo validate client id
+					connections[clientID]->ready = true;
+					shouldContinue();
+				}
+				
+			}
+	}
+	else if(first == 'X'){
+		int clientID = ofToInt(response.substr(1,1));
+		connections[clientID]->started = false;
+		connections[clientID]->ready = false;
+		allconnected = false;
+			//numConnectedClients = 0;
+			currentFrame = 0;
+			shouldTriggerFrame = false;
+		//setDefaults();
+				
+	}
+	
+}
+
+void ofxCameraBase::read(string response,int i) {
+	
+	out("Receiving: " + response);
+	char first = response.at(0);
+	if(first == 'S'){
+					//that's the start!
+			int clientID = ofToInt(response.substr(1,1));
+			if(clientID < numExpectedClients){
+					vector<string> info = ofSplitString(response, ",");
+					EnterCriticalSection(&criticalSection);
+					connections[clientID]->serverIndex = i;
+					connections[clientID]->started = true;
+					LeaveCriticalSection(&criticalSection);
+//					connections[clientID].name = info[1];
+					shouldContinue();
+					
+					numConnectedClients++;
+					cout << "Client ID " << clientID << " with response " << response << endl;
+					
+				}
+			else{
+					err("Received Client ID " + ofToString(clientID)  + " out of range");
+				}
+			
+	}
+	else if(first == 'D'){
+	
+			vector<string> info = ofSplitString(response, ",");
+			if(info.size() >= 3){
+				int clientID = ofToInt(info[1]);
+				int fc = ofToInt(info[2]);
+				if(fc == currentFrame-1){
+				   	//todo validate client id
+					EnterCriticalSection(&criticalSection);
+					connections[clientID]->ready = true;
+					LeaveCriticalSection(&criticalSection);
+					shouldContinue();
+					
+				}
+				else
+					out("Frame Mis-Match");
+						
+			}
+	}
+	else if(first == 'F'){
+		vector<string> strEntries = ofSplitString(response,"[/p]");
+		int clientID = ofToInt(response.substr(1,1));
+		for(int i=1;i<strEntries.size();i++){
+			vector<string> entry = ofSplitString(strEntries[i],"|");
+			ofPoint temp;
+			temp.x = atof(entry[0].c_str())*320;
+			temp.y = atof(entry[1].c_str())*240;
+			
+			//cvCircle(connections[clientID]->blobImage.getCvImage(),cvPoint(temp.x,temp.y),30,cvScalar(255,255,255),-1);	
+			
+		}
+			
+	}
+		
+
+	else if(first == 'X'){
+		//ofSleepMillis(150);
+		ofSleepMillis(550);
+		send("X");
+		ofSleepMillis(500);
+		int clientID = ofToInt(response.substr(1,1));
+		out("Diconnect all clients"+ofToString(i));
+		for(int i = 0; i < numExpectedClients; i++){
+			tcpServer.disconnectClient(i);
+			EnterCriticalSection(&criticalSection);
+			connections[clientID]->started = false;
+			connections[clientID]->ready = false;
+			LeaveCriticalSection(&criticalSection);
+		}
+		//send("X");
+		setDefaults();
+		restartServer();
+	}
+	else{
+		EnterCriticalSection(&criticalSection);
+		connections[i]->started = false;
+		connections[i]->ready =false;
+		LeaveCriticalSection(&criticalSection);
+	}
+}
+
+void ofxCameraBase::send(string _msg) {
+    out("Sending: " + _msg);
+   	if(bTCP)
+	{
+		if(allconnected)
+		tcpServer.sendToAll(_msg);
+	}
+	else
+	udpSender.Send(_msg.c_str(),_msg.length());
+}
+
+void ofxCameraBase::quit() {
+    out("Quitting.");
+//	tuioclient.disconnect();
+	if(bTCP){
+		tcpServer.close();
+	}
+	else{
+		udpSender.Close();
+		udpReceiver.Close();
+	}
+	EnterCriticalSection(&criticalSection);
+	connections.clear();
+	LeaveCriticalSection(&criticalSection);
+	isServerThreadRunning = false;
+    CloseHandle(serverThread);
+}
+
+void ofxCameraBase::restartServer(){
+	out("Restarting TCP Server");
+	tcpServer.close();
+	isServerThreadRunning = false;
+	CloseHandle(serverThread);
+	ofSleepMillis(3000);
+	startServer();
+	out("TCP Server Restart Complete!!!");
 }

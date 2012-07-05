@@ -18,6 +18,8 @@
 #include "ofMain.h"
 #include "ofxGUIDHelper.h"
 #include "ofxXMLSettings.h"
+#include "ofxNetwork.h"
+#include "connection.h"
 
 class ofxCameraBase
 {
@@ -44,11 +46,13 @@ public:
 		rawCameraFrame = NULL;
 		isPaused = false;
 		isRaw = 0;
+
 	}
 	//Virtual destructor for CameraBase class
 	virtual ~ofxCameraBase(){}
 	//Initialization procedure that get
 	//GUID cameraGuid - global idetifier of camera. PS3 Eye uses all GUID data structure, but FFMV, CMU and etc. uses only 64 bit for global identifier. For these cameras use first 64 bits of GUID (Data1)
+	
 	void initializeWithGUID(GUID cameraGuid);
 	//Deinitialization of CameraBase class
 	void deinitializeCamera();
@@ -94,6 +98,7 @@ public:
 	void saveCameraSettings();
 	//start settings dialog
 	virtual void callSettingsDialog() { };
+	
 protected:
 	//logic for updating current frame
 	void updateCurrentFrame();
@@ -112,6 +117,7 @@ protected:
 	//setting camera type
 	virtual void setCameraType() {}
 	void loadDefaultCameraSettings();
+	
 private:
 	void Capture();
 	void receiveSettingsFromCamera();
@@ -133,6 +139,63 @@ protected:
 	unsigned char* cameraFrame;
 	unsigned char* rawCameraFrame;
 	ofxCameraBaseSettings* cameraBaseSettings;
+
+public:
+	//Server details -- functions
+	HANDLE serverThread;
+	void  serverSetup(string _fileString);
+	void  loadServerSettings(string _fileString);
+	void  out(string _msg);
+    void  print(string _msg);
+    void  err(string _msg);
+	void  startServer();
+	static DWORD WINAPI ServerThread(LPVOID instance);
+	void  shouldContinue();
+	void  read(string response);
+	void  read(string response, int i);
+	void  send(string _msg);
+	void  quit();
+	void  restartServer();
+	void setDefaults(){
+            allconnected = false;
+			//numConnectedClients = 0;
+			currentFrame = 0;
+			shouldTriggerFrame = false;
+			running = false;
+			newMessage = false;
+			lastFrameTriggeredTime = 0;
+			timeOfNextHeartbeat = ofGetElapsedTimef();
+			heartBeatInterval = 2.0;
+			numConnectedClients=0;
+			numExpectedClients = 1;    
+			isServerThreadRunning =false;
+	}
+	void Server();
+
+	vector<connection *> connections;
+	//Server details -- variables
+	bool shouldTriggerFrame;
+	int i;
+	int serverInPort;
+	int serverOutPort;
+	string broadcast;
+	ofxTCPServer tcpServer;
+	ofxUDPManager udpSender;
+	ofxUDPManager udpReceiver;
+	bool bTCP;
+	float lastFrameTriggeredTime;
+	bool allconnected;
+	bool running;                
+	int fps;
+	int numExpectedClients;
+	int numConnectedClients;
+	int currentFrame;
+	bool newMessage;
+	string currentMessage;
+	float timeOfNextHeartbeat;
+	float heartBeatInterval;
+	bool isServerThreadRunning;
+	
 };
 
 #endif // OFX_CAMERABASE_H

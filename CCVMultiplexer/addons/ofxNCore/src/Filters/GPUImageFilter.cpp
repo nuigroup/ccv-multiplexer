@@ -56,7 +56,7 @@ GPUImageFilter::GPUImageFilter(const char* fname, int sx, int sy){
 	res_x = sx; res_y = sy;
 	useGeometryShader =false;
 	glGenTextures(1, &output_texture );
-	getFrameBufferForTexture(&output_buffer, &output_texture, res_x, res_y);
+	//getFrameBufferForTexture(&output_buffer, &output_texture, res_x, res_y);
 	this->parseXML(fname);
 
 }

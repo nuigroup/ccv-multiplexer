@@ -1,7 +1,10 @@
 #include "ofxIPImage.h"
 
 ofxIPImage::ofxIPImage(){
-	cout<<"ofxIPImage constructor";
+//	x=1;
+	
+	//fbo.allocate(320,240,GL_RGB);
+	//cout<<"FBO Allocate"<<endl;
 	/*height = 240;
 	width=320;
 	blobImage.allocate(width, height); //main Image that'll be processed.
@@ -14,6 +17,7 @@ ofxIPImage::ofxIPImage(){
 ofxIPImage::~ofxIPImage()
 {
 	deinitializeCamera();
+//	stopThread();
 }
 
 void ofxIPImage::callSettingsDialog()
@@ -63,39 +67,47 @@ void ofxIPImage::getCameraFeature(CAMERA_BASE_FEATURE featureCode,int* firstValu
 }
 
 void ofxIPImage::getNewFrame(unsigned char* newFrame)
-{
-	ofImage test;
-	//syncserver::getPixels(guid.Data1, newFrame);
-	test.allocate(320,240,OF_IMAGE_COLOR_ALPHA);
-	cout<<"new Frame called";
-	fbo.clear();
-	fbo.begin();
-		//test.loadImage("car.jpg");
-		ofCircle(10,10,50);
-	fbo.end();
-	
-	
+{	 //copy =getValue();
+	//cout<<copy[0].size<<endl;
+	//if(x==1){
+	/*for(int i = 0; i < 1; i++){
+		
+		Connection c;
+		c.started = false;
+		c.ready = false;
+		c.height =240;
+		c.width = 320;
+		c.depth =3;
+		c.serverIndex = i;
+		c.test=22;
+		//c.blobImage.allocate(320,240);
+		//c.name = "noname";
+		connections.push_back(c);
+	}
+	}
+	x++;*/
 
-	test.setFromPixels((unsigned char*)fbo.getPixels(),320,240,OF_IMAGE_COLOR_ALPHA);
-	test.saveImage("output.jpg");
 
+
+	//ofSleepMillis(120);
+	/*cvRectangle(connections[0].blobImage.getCvImage(),cvPoint(0,0),cvPoint(320,240),cvScalar(0,0,0),-1);
+	memcpy((void*)newFrame,(unsigned char*)connections[0].blobImage.getPixels(),320*240*3*sizeof(unsigned char));
+	if(connections[0].ready)
+	memcpy((void*)newFrame,(unsigned char*)connections[0].blobImage.getPixels(),320*240*3*sizeof(unsigned char));*/
+	//getPixels(guid.Data1,newFrame);
 	
-	memcpy((void*)newFrame,test.getPixels(),320 * 240 * depth * sizeof(unsigned char));
-	//for (int j = 0; j < 320*240; j++){
-			//newFrame[j]=(unsigned char) (210);
-		//	cout<<newFrame[j];
-		//}
+	cout<<"IPIMAGE VALUE OF TEST"<<connections[0]->started<<endl;
+	//connections[0].test = false;
 }
 
 void ofxIPImage::cameraInitializationLogic()
 {
-	width =320;
-	height =240;
-	depth = 3;
-	fbo.allocate(320,240,GL_RGB);
+	
+	
 }
 
 void ofxIPImage::cameraDeinitializationLogic()
 {
-	
 }
+
+

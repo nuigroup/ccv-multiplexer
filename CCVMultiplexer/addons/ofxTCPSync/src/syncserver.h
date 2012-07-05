@@ -1,48 +1,36 @@
-#ifndef SYNCSERVER_H_INCLUDED
+/*#ifndef SYNCSERVER_H_INCLUDED
 #define SYNCSERVER_H_INCLUDED
 
 //#include "ofMain.h"
 
-#include "ofxNetwork.h"
+
+#include "Connection.h"
+
 #include "ofxThread.h"
 #include "ofxXmlSettings.h"
-#include "ofxFBOTexture.h"
+#include <vector>
 #include "ofxThread.h"
-
-
-
-typedef struct
-{
-	bool started;
-	bool ready;
-	//string name;
-	int serverIndex;
-	bool calibrate;
-	int	GRID_X;
-	int	GRID_Y;
-	
-//	ofImage				testImage;
-//	ofxCvColorImage		blobImage;
-//	ofxCvGrayscaleImage blackImage;
-//	ofxCvGrayscaleImage blobImageBw;
-	int height;
-	int width;
-	int depth;
-	std::vector<ofPoint> points;
-
-} Connection;
-
 
 class syncserver : public ofxThread {
 
 	public:
+		 syncserver();
+		vector<connection> connections;
+		void send(string _msg);---
+		void  setup(string _fileString);--------
+        void  start();-----
+		bool getValue();
+		void abc();
 
-        syncserver();
-		void  setup(string _fileString);
-        void  start();
-        void  quit();
-		void shouldContinue();
-		void setDefaults(){
+       
+
+
+		bool shouldTriggerFrame;--
+	
+		
+        void  quit();--
+		void shouldContinue();----
+		void setDefaults(){-----
             allconnected = false;
 			//numConnectedClients = 0;
 			currentFrame = 0;
@@ -55,19 +43,20 @@ class syncserver : public ofxThread {
 			numConnectedClients=0;
 			numExpectedClients = 1;
 			
+			
         }
-
 		void threadedFunction();
-        void loadIniFile(string _fileString);
+		
+        void loadIniFile(string _fileString);-----
 		void restartServer();
         
-        void  out(string _msg);
-        void  print(string _msg);
-        void  err(string _msg);
+        void  out(string _msg);---
+        void  print(string _msg);---
+        void  err(string _msg);--
 
-        void read(string response);
-		void read(string response, int i);
-        void send(string _msg);
+        void read(string response);---
+		void read(string response, int i);---
+       
 		int getDeviceCount(){return numConnectedClients;}
 
 		void getCalibData();
@@ -82,21 +71,25 @@ class syncserver : public ofxThread {
 		bool bTCP;
 		float lastFrameTriggeredTime;
 		bool allconnected;
-		bool running;
+		bool running;                
 		int fps;
 		int numExpectedClients;
 		int numConnectedClients;
 		int currentFrame;
-		bool shouldTriggerFrame;
-		vector<Connection> connections;
+		
+		
+
 		bool newMessage;
 		string currentMessage;
 		float timeOfNextHeartbeat;
 		float heartBeatInterval;
 
 
-		void getPixels(int id,unsigned char * pixels);
-
+		void getPixels(int id, unsigned char * newFrame);
+		
+		ofxCvColorImage test;
+		void copy();
+		
 	//	ofxTuioClient tuioclient;
 		//TUIOListener Interface
 		//void addTuioObject(TuioObject * tobj);
@@ -108,8 +101,7 @@ class syncserver : public ofxThread {
 		//void removeTuioCursor(TuioCursor * tcur);
 
 		//std::list< struct connection*> tuioSources;
-		unsigned char * blackPixels;
-		ofxFBOTexture fbo;
+		
 		
 //private:
 	//TuioTime currentTime; //namespace tuio
@@ -117,4 +109,4 @@ class syncserver : public ofxThread {
 
 };
   
-#endif
+#endif*/

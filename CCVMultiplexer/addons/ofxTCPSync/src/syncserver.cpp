@@ -1,8 +1,11 @@
+/*
+
 #include "syncserver.h"
 
 syncserver::syncserver() {
-//	fbo.allocate(320,240);
+	
     setDefaults(); 
+	
 }
 
 void syncserver::setup(string _fileString) {
@@ -17,21 +20,21 @@ void syncserver::setup(string _fileString) {
 		udpSender.SetReuseAddress(true);
 	}
 	for(int i = 0; i < numExpectedClients; i++){
-		Connection c;
+		
+		connection c ;
 		c.started = false;
 		c.ready = false;
 		c.height =240;
 		c.width = 320;
-		c.depth =1;
+		c.depth =3;
 		c.serverIndex = i;
-		//c.name = "noname";
+		c.blobImage.allocate(320,240);
+		//c->name = "noname";
+		c.test=false;
 		connections.push_back(c);
+		
 	}
-
-	blackPixels			= new unsigned char [320* 240];
-	for (int j = 0; j < 320*240; j++){
-			blackPixels[j] = (unsigned char)(255);
-		}
+	
 }
 
 void syncserver::loadIniFile(string _fileString) {
@@ -55,6 +58,7 @@ void syncserver::loadIniFile(string _fileString) {
 	
 }
 
+
 void syncserver::out(string _str) {
     print(_str);
 }
@@ -68,9 +72,6 @@ void syncserver::err(string _str) {
 }
 
 void syncserver::start() {
-	//tuioclient.connect(3333);
-	//this->addTuioListener(this);
-	
 	if(bTCP)
 	{
 		if(!tcpServer.setup(serverInPort, false)){
@@ -98,18 +99,27 @@ void syncserver::start() {
 			out("UDP Output Server setup on::" +ofToString(serverOutPort));
 		}
 	}
-  startThread(true,false);  // blocking, verbose
+ startThread(true,false);  // blocking, verbose
+  
 }
 
-void syncserver::threadedFunction() {
+//void syncserver::abc() {
+void syncserver::threadedFunction(){
     out("Running!");
         
     while (isThreadRunning()) {
-				if(shouldTriggerFrame){
-					lock();
+		//lock();
+	cout<<"SYNCSERVER VALUE OF TEST"<<connections.size()<<endl;
+		//connections[0].test=true;
+		//unlock();
+
+		
+		
+		if(shouldTriggerFrame){
+						
 					float now = ofGetElapsedTimef();
 					float elapsed = (now - lastFrameTriggeredTime);
-
+					
 					if(elapsed >= 1.0/fps){
 							string message = "G,"+ofToString(currentFrame);
 							if (newMessage){
@@ -124,17 +134,21 @@ void syncserver::threadedFunction() {
 						currentFrame++;
 						i=numExpectedClients;
 					}
-					unlock();
-				}
-
-				else {
-					lock();
+					
+		}
+		
+		
+		else {
+						
+			
 					if(bTCP){
 						for(int i = 0; i < tcpServer.getLastID(); i++){
 							if(tcpServer.isClientConnected(i)){
 								string response = tcpServer.receive(i);
 									if (response.length() > 0) {
+										//lock();
 										read(response,i);
+										
 									}
 							}
 							else
@@ -152,11 +166,13 @@ void syncserver::threadedFunction() {
 							read(response);
 						}	
 					}
-					unlock();
-					ofSleepMillis(5);
-				}
+		}
+					
 			
+		
+	ofSleepMillis(50);
 	}
+
 }
 
 
@@ -250,16 +266,20 @@ void syncserver::read(string response,int i) {
 			int clientID = ofToInt(response.substr(1,1));
 			if(clientID < numExpectedClients){
 					vector<string> info = ofSplitString(response, ",");
+					
 					connections[clientID].serverIndex = i;
 					connections[clientID].started = true;
 //					connections[clientID].name = info[1];
+					shouldContinue();
+					
 					numConnectedClients++;
 					cout << "Client ID " << clientID << " with response " << response << endl;
-					shouldContinue();
+					
 				}
 			else{
 					err("Received Client ID " + ofToString(clientID)  + " out of range");
 				}
+			
 	}
 	else if(first == 'D'){
 	
@@ -269,11 +289,13 @@ void syncserver::read(string response,int i) {
 				int fc = ofToInt(info[2]);
 				if(fc == currentFrame-1){
 				   	//todo validate client id
+					
 					connections[clientID].ready = true;
 					shouldContinue();
+					
 				}
 				else
-					out("here is the error");
+					out("Frame Mis-Match");
 						
 			}
 	}
@@ -283,16 +305,17 @@ void syncserver::read(string response,int i) {
 		for(int i=1;i<strEntries.size();i++){
 			vector<string> entry = ofSplitString(strEntries[i],"|");
 			ofPoint temp;
-			temp.x = atof(entry[0].c_str());
-			temp.y = atof(entry[1].c_str());
-			connections[clientID].points.push_back(temp);
+			temp.x = atof(entry[0].c_str())*320;
+			temp.y = atof(entry[1].c_str())*240;
+			lock();
+			//cvCircle(connections[clientID]->blobImage.getCvImage(),cvPoint(temp.x,temp.y),30,cvScalar(255,255,255),-1);	
+			unlock();
 		}
+			
 	}
 		
 
 	else if(first == 'X'){
-
-		
 		//ofSleepMillis(150);
 		ofSleepMillis(550);
 		send("X");
@@ -301,16 +324,20 @@ void syncserver::read(string response,int i) {
 		out("Diconnect all clients"+ofToString(i));
 		for(int i = 0; i < numExpectedClients; i++){
 			tcpServer.disconnectClient(i);
+			lock();
 			connections[clientID].started = false;
 			connections[clientID].ready = false;
+			unlock();
 		}
 		//send("X");
 		setDefaults();
 		restartServer();
 	}
 	else{
+		lock();
 		connections[i].started = false;
 		connections[i].ready =false;
+		unlock();
 	}
 }
 
@@ -343,6 +370,7 @@ void syncserver::quit() {
 		udpSender.Close();
 		udpReceiver.Close();
 	}
+	
 	connections.clear();
     stopThread();
 }
@@ -356,30 +384,27 @@ void syncserver::restartServer(){
 	out("TCP Server Restart Complete!!!");
 }
 
-
-/*void syncserver::initimage(){
+void syncserver::copy(){
+	//test.allocate(320,240);
+	//if(shouldTriggerFrame)
+	//test = connections[0].blobImage;
 	
-	for(int i = 0; i < numExpectedClients; i++){
-	//	connections[i].blobImage.allocate(width, height); //main Image that'll be processed.
-	//	connections[i].blackImage.allocate(width, height);
-	//	connections[i].blobImageBw.allocate(width, height);
-	//	connections[i].testImage.allocate(width, height,OF_IMAGE_GRAYSCALE);
-		connections[i].blackPixels			= new unsigned char [width* height];
+}
 
-		// black pixels
-		for (int j = 0; j < width*height; j++){
-			connections[i].blackPixels[j] = (unsigned char)(0);
-		}
-	
-		connections[i].blackImage.setFromPixels(blackPixels,width, height);
-	}
-}*/
-
-
-void syncserver::getPixels(int id, unsigned char *newFrame)
+void syncserver::getPixels(int id, unsigned char * newFrame)
 {
-	int ID=id;
-	cout<<"\n*****************getpixels called*********************\n";
+	//cout<<"**********<<"<<shouldTriggerFrame;
+	//if(shouldTriggerFrame)
+	//memcpy((void*)newFrame,(unsigned char*)test.getPixels(),320*240*3*sizeof(unsigned char));
+	//int ID=id;
+	
+	//cout<<"\n*****************getpixels called*********************\n";
+	//if(x>10)
+	//te.setFromPixels((unsigned char*)fbopixels,320,240,OF_IMAGE_COLOR_ALPHA);
+	//else
+	
+
+	//memcpy((unsigned char*)blackPixels,fbopixels,320 * 240 * 1 * sizeof(unsigned char));
 	//for (int j = 0; j < 320*240; j++){
 	//		connections[i].blackPixels[j] = (unsigned char)(255);
 	//	}
@@ -388,8 +413,7 @@ void syncserver::getPixels(int id, unsigned char *newFrame)
 	//memcpy((unsigned char*)newFrame,(unsigned char*)connections[i].blackPixels,320 * 240 * 1 * sizeof(unsigned char));
 	//ofxFBOTexture* myfbo = new ofxFBOTexture;
 	//myfbo->allocate(320,240);
-	//myfbo->begin();
-	//myfbo->clear();
+	
 	//ofSetColor(0);
 	//myFBO.begin();
 	//ofSetColor(100, 0,0);
@@ -425,6 +449,5 @@ void syncserver::getPixels(int id, unsigned char *newFrame)
 	//fbo.begin();
 	//	ofCircle(10,10,50);
 	//fbo.end();
-
-}
+	//}
 

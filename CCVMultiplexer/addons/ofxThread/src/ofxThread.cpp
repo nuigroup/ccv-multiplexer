@@ -5,7 +5,7 @@ ofxThread::ofxThread(){
    threadRunning = false; 
    verbose = false;
    #ifdef TARGET_WIN32 
-      InitializeCriticalSection(&critSec); 
+      InitializeCriticalSection(&criticalSection); 
    #else 
       pthread_mutex_init(&myMutex, NULL); 
    #endif 
@@ -38,7 +38,7 @@ void ofxThread::startThread(bool _blocking, bool _verbose){
 
    #ifdef TARGET_WIN32 
       //InitializeCriticalSection(&critSec); 
-      myThread = (HANDLE)_beginthreadex(NULL, 0, this->thread,  (void *)this, 0, NULL); 
+     captureThread = (HANDLE)_beginthreadex(NULL, 0, this->thread,  (void *)this, 0, NULL); 
    #else 
       //pthread_mutex_init(&myMutex, NULL); 
       pthread_create(&myThread, NULL, thread, (void *)this); 
@@ -53,9 +53,9 @@ void ofxThread::startThread(bool _blocking, bool _verbose){
 bool ofxThread::lock(){ 
 
    #ifdef TARGET_WIN32 
-      if(blocking)EnterCriticalSection(&critSec); 
+      if(blocking)EnterCriticalSection(&criticalSection); 
       else { 
-         if(!TryEnterCriticalSection(&critSec)){ 
+         if(!TryEnterCriticalSection(&criticalSection)){ 
             if(verbose)printf("ofxThread: mutext is busy \n"); 
             return false; 
          } 
@@ -86,7 +86,7 @@ bool ofxThread::lock(){
 bool ofxThread::unlock(){ 
 
    #ifdef TARGET_WIN32 
-      LeaveCriticalSection(&critSec); 
+      LeaveCriticalSection(&criticalSection); 
    #else 
       pthread_mutex_unlock(&myMutex); 
    #endif 
@@ -101,7 +101,7 @@ void ofxThread::stopThread(bool close){
 	if(threadRunning){
 		if(close){
 			#ifdef TARGET_WIN32
-				CloseHandle(myThread);
+				CloseHandle(captureThread);
 			#else
 				//pthread_mutex_destroy(&myMutex);
 				pthread_detach(myThread);
@@ -125,14 +125,14 @@ void ofxThread::waitForThread(bool stop){
 		if(verbose)printf("ofxThread: waiting for thread to stop\n");
 		// Wait for the thread to finish
 		#ifdef TARGET_WIN32
-			WaitForSingleObject(myThread, INFINITE);
-			CloseHandle(myThread);
+			WaitForSingleObject(captureThread, INFINITE);
+			CloseHandle(captureThread);
 		#else
 			if(pthread_self()==myThread) printf("ofxThread: error, waitForThread should only be called from outside the thread");
 		    pthread_join(myThread, NULL);
 		#endif
 		if(verbose)printf("ofxThread: thread stopped\n");
-		myThread = NULL;
+		captureThread = NULL;
    }else{
 		if(verbose)printf("ofxThread: thread already stopped\n");
 	}

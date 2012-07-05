@@ -13,7 +13,7 @@
 #include "ofxCameraBase.h"
 #include "ofMain.h"
 #include "videoInput.h"
-#include "ofxFBOTexture.h"
+
 
 class ofxDShow : ofxCameraBase
 {

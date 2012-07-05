@@ -564,14 +564,16 @@ void ofxMultiplexerManager::enumerateCameras()
 		}
 		if (allowdedCameraTypes[i] == IPIMAGE)
 		{
-			cout<<"new ipimage";
 			ofxCameraBase* cam = (ofxCameraBase*)(new ofxIPImage());
 			int cameraCount = 0;
 			GUID* cameraGUIDs = cam->getBaseCameraGuids(&cameraCount);
 			for (int j=0;j<cameraCount;j++)
 			{
-				cout<<"ipimage camera count";
 				ofxCameraBase* newCam = (ofxCameraBase*)(new ofxIPImage());
+				if(j==0){
+					newCam->serverSetup("xml/TCPSyncServer.xml");
+					newCam->startServer();
+					}
 				newCam->initializeWithGUID(cameraGUIDs[j]);
 				cameraBases.push_back(newCam);
 			}
@@ -580,6 +582,7 @@ void ofxMultiplexerManager::enumerateCameras()
 	}
 	for (int i=0;i<cameraBases.size();i++)
 	{
+		
 		cameraBases[i]->startCamera();
 		cameraBases[i]->pauseCamera();
 	}

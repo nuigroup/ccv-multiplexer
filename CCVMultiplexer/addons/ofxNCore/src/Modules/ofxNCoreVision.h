@@ -25,8 +25,10 @@
 #include "ofxThread.h"
 #include "ofxXmlSettings.h"
 #include "ofxFiducialTracker.h"
-#include "syncserver.h"
-#include "ofxFBOTexture.h"
+//#include "syncserver.h"
+
+
+
 
 
 // Our Addon
@@ -245,7 +247,7 @@ public:
             bStandaloneMode = false;
         #endif
 			capturedData = NULL;
-		bMultiCamsInterface = true;
+		bMultiCamsInterface = false;
 		camsGrid = NULL;
 		devGrid = NULL;
 		draggingImage = NULL;
@@ -485,7 +487,9 @@ public:
 	float draggingYOffset;
 	int rawCamId;
 
-	syncserver ccvm;
+	//syncserver ccvm;
+	
+	
 	
 };
 #endif

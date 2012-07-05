@@ -1,6 +1,3 @@
-
-
-
 #include "ofxFBOTexture.h"
 
 #ifdef TARGET_OPENGLES
@@ -17,6 +14,7 @@ GLint ofxFBOTexture::maxRenderBufferSize;
 GLint ofxFBOTexture::maxSamples;
 
 ofxFBOTexture::ofxFBOTexture() {
+	
 	screenFov		= 60;
 	oldFramebuffer	= 0;
 	//	oldRenderbuffer = 0;
@@ -250,8 +248,11 @@ void ofxFBOTexture::allocate(int w, int h, int internalGlDataType, int numSample
 	glBindFramebufferOES(GL_FRAMEBUFFER_OES, oldFramebuffer);
 	
 #endif	
-	
-	
+	cout<<"allocate called"<<endl;
+	GLenum status1;
+	status1 = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+
+	cout <<"FBO.Status allocate:"<< status1<<endl;
 	texData.bAllocated = true;
 }
 
@@ -284,6 +285,10 @@ void ofxFBOTexture::setupScreenForMe(){
 	glTranslatef(0, -h, 0);       // shift origin up to upper-left corner.
 	
     glViewport(0,0,texData.width, texData.height);
+	GLenum status3;
+	status3 = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+
+	//cout <<"FBO.Status setup screen for me:"<< status3<<endl;
 	
 }
 
@@ -322,6 +327,7 @@ void ofxFBOTexture::setupScreenForThem(){
 	
 	
     glViewport(0,0,w, h);
+	
 }
 
 void ofxFBOTexture::swapIn() {
@@ -340,7 +346,10 @@ void ofxFBOTexture::swapIn() {
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING_OES, (GLint *) &oldFramebuffer);
 	glBindFramebufferOES(GL_FRAMEBUFFER_OES, fbo); // bind the FBO to the screen so we can draw to it
 #endif	
-	
+	GLenum status2;
+	status2 = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+
+	cout <<"FBO.Status sawpin:"<< status2<<endl;
 }
 
 
@@ -428,7 +437,6 @@ void ofxFBOTexture::bindAsTexture(){
 }
 
 void ofxFBOTexture::begin() {
-	
 	swapIn();
 	setupScreenForMe();
 }
@@ -449,6 +457,7 @@ void *ofxFBOTexture::getPixels() {
 	if(!alreadyIn) end();  // if fbo wasn't bound when the function was called, unbind it
 	bReading = false;
 	return pixels;
+	
 }
 
 
@@ -481,6 +490,7 @@ bool ofxFBOTexture::isExtensionSupported(const char *extension){
 
 //NIMOY caches various system checks
 void ofxFBOTexture::supportCheck(){
+	//cout<<"SUPORT CHECK***********************************";
 	if(!bSupportChecked){
 		
 		bSupportsFBO = isExtensionSupported("GL_EXT_framebuffer_object");

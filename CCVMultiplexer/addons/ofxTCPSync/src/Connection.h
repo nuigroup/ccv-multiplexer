@@ -1,0 +1,30 @@
+#include "ofxOpenCv.h"
+
+class connection{
+public:
+	connection(){
+		started =false;
+		ready=false;
+		height =240;
+		width=240;
+		depth =3;
+		calibrate=false;
+		//blobImage.allocate(320,240);
+		
+	}
+	bool started;
+	bool ready;
+	//string name;
+	int serverIndex;
+	bool calibrate;
+	int	GRID_X;
+	int	GRID_Y;
+	int height;
+	int width;
+	int depth;
+	ofxCvColorImage	blobImage;
+	bool volatile test;
+	//std::vector<ofPoint> points;
+	//int npnts;
+
+} ;

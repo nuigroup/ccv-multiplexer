@@ -16,7 +16,7 @@
 *****************************************************************************/
 void ofxNCoreVision::_setup(ofEventArgs &e)
 {
-	
+
 	//set the title
 	ofSetWindowTitle("Community Core Vision Multiplexer");
 	//create filter
@@ -24,10 +24,13 @@ void ofxNCoreVision::_setup(ofEventArgs &e)
 	//if ( filter_fiducial == NULL ){filter_fiducial = new ProcessFilters();}
 	if ( filter_fiducial == NULL ){filter_fiducial = new ProcessFiducialFilters();}
 
-	ccvm.setup("xml/TCPSyncServer.xml");
-	ccvm.start();
+	//ccvm.setup("xml/TCPSyncServer.xml");
+	//ccvm.start();
 	//Load Settings from config file
-	loadXMLSettings();
+	
+		loadXMLSettings();
+	
+	
 
 	if(debugMode)
 	{
@@ -55,7 +58,11 @@ void ofxNCoreVision::_setup(ofEventArgs &e)
 
 	//load camera/video
 	initDevice();
+
 	printf("Camera(s)/Video Initialized...\n");
+	
+
+	
 	//set framerate
 	ofSetFrameRate(camRate * 1.3);			//This will be based on camera fps in the future
 
@@ -143,8 +150,6 @@ void ofxNCoreVision::_setup(ofEventArgs &e)
 		//get rid of the console window
 		//FreeConsole();
 	#endif
-
-
 
 	printf("CCV is Initialized!\n\n");
 
@@ -372,6 +377,7 @@ void ofxNCoreVision::initDevice()
 		multiplexerManager->setCalibrator(&calib); //passing the calib instance
 		multiplexerManager->setProcessFilter(filter); //no need of filters in CCVM
 		multiplexerManager->setMultiplexer(multiplexer); // passing multiplexer
+		
 		multiplexerManager->startMulticamManager();
 		interleaveMode = multiplexerManager->getInterleaveMode();
 		#endif
@@ -390,13 +396,15 @@ void ofxNCoreVision::initDevice()
 			return;
         }
 	}
+
+	
 }
 /******************************************************************************
 * The update function runs continuously. Use it to update states and variables
 *****************************************************************************/
 void ofxNCoreVision::_update(ofEventArgs &e)
 {
-	
+
 	if(debugMode) if((stream = freopen(fileName, "a", stdout)) == NULL){}
 
 	bNewFrame = false;
@@ -423,6 +431,8 @@ void ofxNCoreVision::_update(ofEventArgs &e)
 		bNewFrame = vidPlayer->isFrameNew();
 	}
 	//if no new frame, return
+	//bNewFrame = ccvm.shouldTriggerFrame;
+
 	if(!bNewFrame)
 	{
 		return;
@@ -504,6 +514,7 @@ void ofxNCoreVision::_update(ofEventArgs &e)
 			myTUIO.sendTUIO(&getBlobs(),&getObjects(),&fidfinder.fiducialsList);
 		}
 	}
+	
 }
 
 
@@ -528,6 +539,7 @@ void ofxNCoreVision::getPixels()
 				}
 				multiplexer->getStitchedFrame(&w,&h,capturedData);
 				processedImg.setFromPixels(capturedData, camWidth, camHeight);
+				
 				if(contourFinder.bTrackFiducials || bFidtrackInterface){processedImg_fiducial.setFromPixels(capturedData, camWidth, camHeight);}
 			}
 		#endif
@@ -1091,7 +1103,7 @@ void ofxNCoreVision::_keyReleased(ofKeyEventArgs &e)
 
 			//added by pratik9891
 			string message = "C";
-			ccvm.send(message);
+			//ccvm.send(message);
 //			ofSleepMills(400);
 
 

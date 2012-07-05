@@ -200,7 +200,10 @@ int ofxDShow::getCameraBaseCount()
 
 void ofxDShow::getNewFrame(unsigned char* newFrame)
 {
+	ofImage test;
 	VI->getPixels(guid.Data1, newFrame, false, false);
+	test.setFromPixels(rawCameraFrame,320,240,OF_IMAGE_COLOR);
+	test.saveImage("test.jpg");
 }
 
 void ofxDShow::setCameraType()

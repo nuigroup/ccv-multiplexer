@@ -2,11 +2,11 @@
 #define OFXIPIMAGE_H_INCLUDED
 
 #include "ofxCameraBase.h"
+//#include "syncserver.h"
+//#include "connection.h"
 
-#include "syncserver.h"
-#include "ofxFBOTexture.h"
 
-class ofxIPImage : public ofxCameraBase, public syncserver{
+class ofxIPImage : public ofxCameraBase{
 
 public:
 	ofxIPImage();
@@ -23,8 +23,9 @@ protected:
 	void cameraInitializationLogic();
 	void cameraDeinitializationLogic();
 	void setCameraType();
-
-	ofxFBOTexture fbo;
+	
+	
+	
 
 };
 
