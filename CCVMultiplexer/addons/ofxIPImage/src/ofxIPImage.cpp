@@ -1,8 +1,9 @@
 #include "ofxIPImage.h"
 
 ofxIPImage::ofxIPImage(){
-//	x=1;
-	
+	servercopy =NULL;
+	x=0;
+//	image.allocate(320,240);
 	//fbo.allocate(320,240,GL_RGB);
 	//cout<<"FBO Allocate"<<endl;
 	/*height = 240;
@@ -33,8 +34,17 @@ CAMERA_BASE_FEATURE* ofxIPImage::getSupportedFeatures(int* featuresCount)
 
 int ofxIPImage::getCameraBaseCount()
 {
-	int x=1;
-	return x;
+	ofxXmlSettings* xml = new ofxXmlSettings();
+	 if (xml->loadFile("xml/TCPSyncServer.xml"))
+        cout<<"ERROR loading XML file!";
+	else
+		cout<<"Xml Loaded successfully";
+	int num = xml->getValue("settings:numclients", 1, 0);
+	cout<<"clients"<<num;
+	delete xml;
+	xml = NULL;
+	return num;
+	
 }
 
 GUID* ofxIPImage::getBaseCameraGuids(int* camCount)
@@ -67,37 +77,68 @@ void ofxIPImage::getCameraFeature(CAMERA_BASE_FEATURE featureCode,int* firstValu
 }
 
 void ofxIPImage::getNewFrame(unsigned char* newFrame)
-{	 //copy =getValue();
-	//cout<<copy[0].size<<endl;
-	//if(x==1){
-	/*for(int i = 0; i < 1; i++){
+{	 
+	
+	
+	//cout<<"Number of Points"<<servercopy->connections.size()<<endl;
+	
+
+	
 		
-		Connection c;
-		c.started = false;
-		c.ready = false;
-		c.height =240;
-		c.width = 320;
-		c.depth =3;
-		c.serverIndex = i;
-		c.test=22;
-		//c.blobImage.allocate(320,240);
-		//c.name = "noname";
-		connections.push_back(c);
-	}
-	}
-	x++;*/
+	//memcpy((void*)newFrame,(unsigned char*)image.getPixels(),320*240*3*sizeof(unsigned char));
 
 
-
-	//ofSleepMillis(120);
+	
 	/*cvRectangle(connections[0].blobImage.getCvImage(),cvPoint(0,0),cvPoint(320,240),cvScalar(0,0,0),-1);
 	memcpy((void*)newFrame,(unsigned char*)connections[0].blobImage.getPixels(),320*240*3*sizeof(unsigned char));
 	if(connections[0].ready)
 	memcpy((void*)newFrame,(unsigned char*)connections[0].blobImage.getPixels(),320*240*3*sizeof(unsigned char));*/
 	//getPixels(guid.Data1,newFrame);
 	
-	cout<<"IPIMAGE VALUE OF TEST"<<connections[0]->started<<endl;
-	//connections[0].test = false;
+	//ofxCvColorImage test;
+	//image.allocate(320,240);
+	//cout<<"points value"<<connections[0]->points.size()<<endl;
+	//cout<<"GUID number"<<guid.Data1<<endl;
+	//EnterCriticalSection(&criticalSection); 
+	//cvRectangle(image.getCvImage(),cvPoint(0,0),cvPoint(320,240),cvScalar(0,0,0),-1);
+	//LeaveCriticalSection(&criticalSection); 
+	//if(servercopy->connections[guid.Data1]->points.size()!=0)
+	//if(x/2!=0)
+	//{
+		//cvRectangle(image.getCvImage(),cvPoint(0,0),cvPoint(320,240),cvScalar(0,0,0),-1);
+		//for(std::vector<ofPoint>::iterator it = connections[guid.Data1]->points.begin();it != connections[guid.Data1]->points.end();it++)
+		//{
+			//cvCircle(image.getCvImage(),cvPoint((*it).x ,(*it).y),30,cvScalar(255,255,255),-1);
+		//cvCircle(image.getCvImage(),cvPoint(70 ,40),30,cvScalar(255,255,255),-1);
+		//}
+		//cout<<"ENTER"<<endl;
+		
+	//}
+	//else
+	//{
+		//cvRectangle(image.getCvImage(),	cvPoint(0,0),cvPoint(320,240),cvScalar(255,255,255),-1);
+		//cvCircle(image.getCvImage(),cvPoint(70 ,40),30,cvScalar(0,0,0),-1);
+		//cout<<"Outside"<<endl;
+		
+	//}
+	cout<<"get new frae"<<endl;
+	if(servercopy->connections[guid.Data1]->points.size()!=0)
+	{
+		for(std::vector<ofPoint>::iterator it = servercopy->connections[guid.Data1]->points.begin();it != servercopy->connections[guid.Data1]->points.end();it++)
+		{
+			cout<<"Node:"<<guid.Data1<<"Points:"<<(*it).x<<","<<(*it).y<<endl;
+		}
+	}
+	else
+		cout<<"Node:"<<guid.Data1<<"No points recieved"<<endl;
+			//cvCircle(image.getCvImage(),cvPoint((*it).x ,(*it).y),30,cvScalar(255,255,255),-1);
+		//cvCircle(image.getCvImage(),cvPoint(70 ,40),30,cvScalar(255,255,255),-1);
+		//}
+	//memcpy((void*)newFrame,(unsigned char*)servercopy->connections[guid.Data1]->test.getPixels(),320*240*3*sizeof(unsigned char));
+	servercopy->connections[guid.Data1]->points.clear();
+	
+	x++;
+	
 }
 
 void ofxIPImage::cameraInitializationLogic()

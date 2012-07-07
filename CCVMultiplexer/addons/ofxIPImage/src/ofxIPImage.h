@@ -2,7 +2,7 @@
 #define OFXIPIMAGE_H_INCLUDED
 
 #include "ofxCameraBase.h"
-//#include "syncserver.h"
+#include "syncserver.h"
 //#include "connection.h"
 
 
@@ -10,6 +10,11 @@ class ofxIPImage : public ofxCameraBase{
 
 public:
 	ofxIPImage();
+	syncserver* servercopy;
+	ofxIPImage(syncserver* copy)
+	{
+		servercopy=copy;
+	}
 	~ofxIPImage();
 	int getCameraBaseCount();
 	void callSettingsDialog();
@@ -23,6 +28,8 @@ protected:
 	void cameraInitializationLogic();
 	void cameraDeinitializationLogic();
 	void setCameraType();
+	
+	int x;
 	
 	
 	

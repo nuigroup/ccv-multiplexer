@@ -22,7 +22,7 @@ DWORD WINAPI ofxCameraBase::CaptureThread(LPVOID instance)
 
 void ofxCameraBase::StartThreadingCapture()
 {
-	 
+	InitializeCriticalSection(&criticalSection);
 	isCaptureThreadRunning = true;
 	captureThread = CreateThread(NULL, 0, &ofxCameraBase::CaptureThread, this, 0, 0);
 }
@@ -57,7 +57,7 @@ void ofxCameraBase::Capture()
 			}
 			else
 				newFrameCurrentLifetime++;
-			Sleep(1);
+			Sleep(200);
 		}
 	}
 }
@@ -66,10 +66,12 @@ void ofxCameraBase::getCameraFrame(unsigned char* newFrameData)
 { 
 	if (isNewFrame)
 	{
+		
 		EnterCriticalSection(&criticalSection); 
 		isNewFrame = false;
 		memcpy((void*)newFrameData,cameraFrame,width*height*sizeof(unsigned char));
 		LeaveCriticalSection(&criticalSection);
+		//Sleep(200);
 	}
 }
 
@@ -100,6 +102,7 @@ void ofxCameraBase::deinitializeCamera()
 		isInitialized = false;
 		LeaveCriticalSection(&criticalSection);
 		Sleep(100);
+		//quit();
 		DeleteCriticalSection(&criticalSection);
 		free(cameraFrame);
 		free(rawCameraFrame);
@@ -1024,7 +1027,7 @@ void ofxCameraBase::saveCameraSettings()
 
 
 
-
+/*
 void ofxCameraBase::serverSetup(string _fileString){
 	loadServerSettings(_fileString);
 	setDefaults();
@@ -1046,7 +1049,7 @@ void ofxCameraBase::serverSetup(string _fileString){
 		c->width = 320;
 		c->depth =3;
 		c->serverIndex = i;
-		c->blobImage.allocate(320,240);
+		//c->blobImage.allocate(320,240);
 		//c->name = "noname";
 		c->test=false;
 		connections.push_back(c);
@@ -1138,10 +1141,11 @@ void ofxCameraBase::Server(){
 	out("Running!");
         
 	while (isServerThreadRunning) {
-		EnterCriticalSection(&criticalSection);
-			cout<<"SYNCSERVER VALUE OF TEST"<<connections[0]->started<<endl;
-			connections[0]->started=true;
-		LeaveCriticalSection(&criticalSection);
+		//EnterCriticalSection(&criticalSection);
+		//	cout<<"SYNCSERVER VALUE OF TEST"<<connections[0]->started<<endl;
+		//	connections[0]->started=true;
+		//	cvRectangle(connections[0]->blobImage.getCvImage(),cvPoint(0,0),cvPoint(320,240),cvScalar(0,0,0),-1);
+	//	LeaveCriticalSection(&criticalSection);
 		if(shouldTriggerFrame){
 						
 					float now = ofGetElapsedTimef();
@@ -1336,8 +1340,10 @@ void ofxCameraBase::read(string response,int i) {
 			ofPoint temp;
 			temp.x = atof(entry[0].c_str())*320;
 			temp.y = atof(entry[1].c_str())*240;
-			
-			//cvCircle(connections[clientID]->blobImage.getCvImage(),cvPoint(temp.x,temp.y),30,cvScalar(255,255,255),-1);	
+			cout<<"X:"<<temp.x;
+			cout<<"y"<<temp.y<<endl;
+			connections[clientID]->points.push_back(temp);
+		//	cvCircle(connections[clientID]->blobImage.getCvImage(),cvPoint(320,240),30,cvScalar(255,255,255),-1);	
 			
 		}
 			
@@ -1395,15 +1401,17 @@ void ofxCameraBase::quit() {
 	connections.clear();
 	LeaveCriticalSection(&criticalSection);
 	isServerThreadRunning = false;
-    CloseHandle(serverThread);
+  //  CloseHandle(serverThread);
 }
 
 void ofxCameraBase::restartServer(){
 	out("Restarting TCP Server");
 	tcpServer.close();
 	isServerThreadRunning = false;
-	CloseHandle(serverThread);
+	//CloseHandle(serverThread);
+	isServerThreadRunning = false;
 	ofSleepMillis(3000);
 	startServer();
 	out("TCP Server Restart Complete!!!");
 }
+*/

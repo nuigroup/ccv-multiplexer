@@ -8,6 +8,8 @@
 #ifndef OFXMULTIPLEXERMANAGER_H_INCLUDED
 #define OFXMULTIPLEXERMANAGER_H_INCLUDED
 
+#include"syncserver.h"
+
 #include "ofxIPImage.h"
 #include "ofxCameraBase.h"
 #include "ofxCameraBaseSettings.h"
@@ -65,6 +67,7 @@ public:
 	void readSettingsFromXML(char* fileName="xml/multiplexer_settings.xml");
 	void saveSettingsToXML(char* fileName="xml/multiplexer_settings.xml");
 	void initializeCalibration();
+	
 private:
 	void enumerateCameras();
 private:
@@ -79,6 +82,9 @@ private:
 	std::vector<ofxCameraBaseCalibration* > cameraBasesCalibration;
 	std::vector<CAMERATYPE> allowdedCameraTypes;
 	bool isMultiplexerNeedToUpdate;
+
+public:
+	syncserver* server;
 };
 
 #endif //OFXMULTIPLEXERMANAGER_H_INCLUDED

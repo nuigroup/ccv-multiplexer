@@ -22,7 +22,7 @@
 #include "ofxVectorMath.h"
 #include "ofxNetwork.h"
 #include "ofxOsc.h"
-#include "ofxThread.h"
+//#include "ofxThread.h"
 #include "ofxXmlSettings.h"
 #include "ofxFiducialTracker.h"
 //#include "syncserver.h"

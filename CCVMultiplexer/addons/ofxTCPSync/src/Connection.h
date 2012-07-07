@@ -9,8 +9,8 @@ public:
 		width=240;
 		depth =3;
 		calibrate=false;
-		//blobImage.allocate(320,240);
-		
+		test.allocate(320,240,OF_IMAGE_COLOR);
+		//blobImage.allocate(320,240);	
 	}
 	bool started;
 	bool ready;
@@ -22,8 +22,10 @@ public:
 	int height;
 	int width;
 	int depth;
-	ofxCvColorImage	blobImage;
-	bool volatile test;
+	//bool test;
+	vector<ofPoint> points;
+	ofxCvColorImage blobImage;
+	ofImage test;
 	//std::vector<ofPoint> points;
 	//int npnts;
 

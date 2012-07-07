@@ -19,7 +19,7 @@
 #include "ofxGUIDHelper.h"
 #include "ofxXMLSettings.h"
 #include "ofxNetwork.h"
-#include "connection.h"
+#include "syncserver.h"
 
 class ofxCameraBase
 {
@@ -27,6 +27,7 @@ public:
 	//Constructor for CameraBase class
 	ofxCameraBase()
 	{
+	//	servercopy = NULL;
 		depth = 1;
 		width = 640;
 		height = 480;
@@ -48,6 +49,8 @@ public:
 		isRaw = 0;
 
 	}
+	
+	
 	//Virtual destructor for CameraBase class
 	virtual ~ofxCameraBase(){}
 	//Initialization procedure that get
@@ -139,7 +142,7 @@ protected:
 	unsigned char* cameraFrame;
 	unsigned char* rawCameraFrame;
 	ofxCameraBaseSettings* cameraBaseSettings;
-
+/*
 public:
 	//Server details -- functions
 	HANDLE serverThread;
@@ -194,7 +197,7 @@ public:
 	string currentMessage;
 	float timeOfNextHeartbeat;
 	float heartBeatInterval;
-	bool isServerThreadRunning;
+	bool isServerThreadRunning;*/
 	
 };
 

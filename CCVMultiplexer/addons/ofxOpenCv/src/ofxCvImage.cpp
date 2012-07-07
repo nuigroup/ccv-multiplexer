@@ -30,7 +30,7 @@ ofxCvImage::~ofxCvImage() {
 //--------------------------------------------------------------------------------
 void ofxCvImage::allocate( int w, int h ) {
 	if (bAllocated == true){
-		ofLog(OF_LOG_WARNING, "in allocate, reallocating a ofxCvImage");
+		//ofLog(OF_LOG_WARNING, "in allocate, reallocating a ofxCvImage");
 		clear();
 	}
 

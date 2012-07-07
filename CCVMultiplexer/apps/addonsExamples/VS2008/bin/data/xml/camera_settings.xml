@@ -39,7 +39,7 @@
                     <AUTO>0</AUTO>
                 </CONTRAST>
                 <GAIN>
-                    <VALUE>1</VALUE>
+                    <VALUE>33</VALUE>
                     <AUTO>0</AUTO>
                 </GAIN>
                 <SATURATION>
@@ -51,7 +51,7 @@
                     <AUTO>0</AUTO>
                 </SHARPNESS>
                 <EXPOSURE>
-                    <VALUE>-4</VALUE>
+                    <VALUE>-6</VALUE>
                     <AUTO>1</AUTO>
                 </EXPOSURE>
                 <FRAMERATE>15</FRAMERATE>
@@ -72,6 +72,74 @@
             <SENSOR>
                 <MODE>0</MODE>
                 <DEPTH>3</DEPTH>
+            </SENSOR>
+        </SETTINGS>
+    </CAMERA>
+    <CAMERA>
+        <SETTINGS>
+            <GUID>1</GUID>
+            <TYPE>IPIMAGE</TYPE>
+            <FRAME>
+                <RAW>0</RAW>
+                <WIDTH>640</WIDTH>
+                <HEIGHT>480</HEIGHT>
+                <LEFT>0</LEFT>
+                <TOP>0</TOP>
+            </FRAME>
+            <SENSOR>
+                <MODE>0</MODE>
+                <DEPTH>1</DEPTH>
+            </SENSOR>
+        </SETTINGS>
+    </CAMERA>
+    <CAMERA>
+        <SETTINGS>
+            <GUID>2</GUID>
+            <TYPE>IPIMAGE</TYPE>
+            <FRAME>
+                <RAW>0</RAW>
+                <WIDTH>640</WIDTH>
+                <HEIGHT>480</HEIGHT>
+                <LEFT>0</LEFT>
+                <TOP>0</TOP>
+            </FRAME>
+            <SENSOR>
+                <MODE>0</MODE>
+                <DEPTH>1</DEPTH>
+            </SENSOR>
+        </SETTINGS>
+    </CAMERA>
+    <CAMERA>
+        <SETTINGS>
+            <GUID>3</GUID>
+            <TYPE>IPIMAGE</TYPE>
+            <FRAME>
+                <RAW>0</RAW>
+                <WIDTH>640</WIDTH>
+                <HEIGHT>480</HEIGHT>
+                <LEFT>0</LEFT>
+                <TOP>0</TOP>
+            </FRAME>
+            <SENSOR>
+                <MODE>0</MODE>
+                <DEPTH>1</DEPTH>
+            </SENSOR>
+        </SETTINGS>
+    </CAMERA>
+    <CAMERA>
+        <SETTINGS>
+            <GUID>4</GUID>
+            <TYPE>IPIMAGE</TYPE>
+            <FRAME>
+                <RAW>0</RAW>
+                <WIDTH>640</WIDTH>
+                <HEIGHT>480</HEIGHT>
+                <LEFT>0</LEFT>
+                <TOP>0</TOP>
+            </FRAME>
+            <SENSOR>
+                <MODE>0</MODE>
+                <DEPTH>1</DEPTH>
             </SENSOR>
         </SETTINGS>
     </CAMERA>

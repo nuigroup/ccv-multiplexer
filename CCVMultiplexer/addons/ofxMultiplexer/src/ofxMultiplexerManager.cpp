@@ -495,6 +495,10 @@ int ofxMultiplexerManager::getCameraBaseCount()
 
 void ofxMultiplexerManager::enumerateCameras()
 {
+	server = new syncserver();
+	server->serverSetup("xml/TCPSyncServer.xml");
+	server->startServer();
+
 	for (int i=0;i<allowdedCameraTypes.size();i++)
 	{
 		if (allowdedCameraTypes[i] == PS3)
@@ -564,16 +568,18 @@ void ofxMultiplexerManager::enumerateCameras()
 		}
 		if (allowdedCameraTypes[i] == IPIMAGE)
 		{
+								
 			ofxCameraBase* cam = (ofxCameraBase*)(new ofxIPImage());
 			int cameraCount = 0;
 			GUID* cameraGUIDs = cam->getBaseCameraGuids(&cameraCount);
 			for (int j=0;j<cameraCount;j++)
 			{
-				ofxCameraBase* newCam = (ofxCameraBase*)(new ofxIPImage());
-				if(j==0){
-					newCam->serverSetup("xml/TCPSyncServer.xml");
-					newCam->startServer();
-					}
+				ofxCameraBase* newCam = (ofxCameraBase*)(new ofxIPImage(server));
+				//if(j==1){
+				//	newCam->serverSetup("xml/TCPSyncServer.xml");
+				//	newCam->startServer();
+				//	}
+				//newCam(server);
 				newCam->initializeWithGUID(cameraGUIDs[j]);
 				cameraBases.push_back(newCam);
 			}
