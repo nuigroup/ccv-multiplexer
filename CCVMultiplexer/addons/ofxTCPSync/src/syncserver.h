@@ -11,6 +11,7 @@
 class syncserver{
 	public:
 	//Server details -- functions
+	~syncserver();
 	HANDLE serverThread;
 	void  serverSetup(string _fileString);
 	void  loadServerSettings(string _fileString);
@@ -40,6 +41,11 @@ class syncserver{
 			isServerThreadRunning =false;
 	}
 	void Server();
+	void disconntinue();
+	void image_set_pixel (unsigned char *data, size_t x, size_t y, unsigned char  value);
+	void draw_circle (unsigned char *data,int radius,int p1,int p2, unsigned char  value);
+	void image_fill (unsigned char *data, unsigned char value);
+
 
 	vector<connection *> connections;
 	//Server details -- variables
@@ -66,6 +72,7 @@ class syncserver{
 	bool isServerThreadRunning;
 	CRITICAL_SECTION criticalSection;
 	int y;
+	bool check;
 };
 
 

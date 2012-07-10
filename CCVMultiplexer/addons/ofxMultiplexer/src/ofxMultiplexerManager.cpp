@@ -24,8 +24,14 @@ ofxMultiplexerManager::~ofxMultiplexerManager()
 {
 	
 	saveSettingsToXML();
+	
+	Sleep(50);
+	server->disconntinue();
+	//Sleep(50);
 	for (int i=0;i<cameraBases.size();i++)
-		delete cameraBases[i];
+	{delete cameraBases[i];}
+
+	
 	
 }
 void ofxMultiplexerManager::getCameraGridSize(int* width,int* height)

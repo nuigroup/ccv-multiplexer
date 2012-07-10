@@ -200,7 +200,7 @@ int ofxDShow::getCameraBaseCount()
 
 void ofxDShow::getNewFrame(unsigned char* newFrame)
 {
-	
+	cout<<"a"<<endl;
 	VI->getPixels(guid.Data1, newFrame, false, false);
 	
 }

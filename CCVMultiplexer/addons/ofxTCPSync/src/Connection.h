@@ -9,7 +9,7 @@ public:
 		width=240;
 		depth =3;
 		calibrate=false;
-		test.allocate(320,240,OF_IMAGE_COLOR);
+		//test.allocate(320,240,OF_IMAGE_COLOR);
 		//blobImage.allocate(320,240);	
 	}
 	bool started;
@@ -25,7 +25,8 @@ public:
 	//bool test;
 	vector<ofPoint> points;
 	ofxCvColorImage blobImage;
-	ofImage test;
+	unsigned char * test;
+	
 	//std::vector<ofPoint> points;
 	//int npnts;
 
