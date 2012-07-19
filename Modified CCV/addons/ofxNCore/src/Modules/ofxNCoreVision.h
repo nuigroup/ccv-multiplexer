@@ -25,7 +25,7 @@
 //#include "ofxThread.h"
 #include "ofxXmlSettings.h"
 #include "ofxFiducialTracker.h"
-#include "ofxTCPSync.h"
+#include "ofxTCPSyncClient.h"
 
 // Our Addon
 #include "ofxNCore.h"

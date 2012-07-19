@@ -1068,23 +1068,11 @@
 					Name="src"
 					>
 					<File
-						RelativePath="..\..\..\addons\ofxTCPSync\src\ofxTCPSync.h"
-						>
-					</File>
-					<File
 						RelativePath="..\..\..\addons\ofxTCPSync\src\ofxTcpSyncClient.cpp"
 						>
 					</File>
 					<File
 						RelativePath="..\..\..\addons\ofxTCPSync\src\ofxTcpSyncClient.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\..\addons\ofxTCPSync\src\ofxTcpSyncEvents.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\..\..\addons\ofxTCPSync\src\ofxTcpSyncEvents.h"
 						>
 					</File>
 				</Filter>

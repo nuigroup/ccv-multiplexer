@@ -16,7 +16,7 @@
 *****************************************************************************/
 void ofxNCoreVision::_setup(ofEventArgs &e)
 {
-	ofSetFrameRate(60);
+	//ofSetFrameRate(60);
 	//set the title
 	ofSetWindowTitle("Community Core Vision - 1.5");
 	//create filter
@@ -25,6 +25,8 @@ void ofxNCoreVision::_setup(ofEventArgs &e)
 	if ( filter_fiducial == NULL ){filter_fiducial = new ProcessFiducialFilters();}
 
 	syncClient.setup("xml/settings.xml", this);
+	syncClient.create();
+	syncClient.start();
 	//Load Settings from config file
 	loadXMLSettings();
 	
@@ -201,6 +203,7 @@ void ofxNCoreVision::loadXMLSettings()
 		supportedCameraTypes.push_back(KINECT);
 	if (XML.getValue("CONFIG:MULTIPLEXER:CAMERATYPES:DIRECTSHOW", 0))
 		supportedCameraTypes.push_back(DIRECTSHOW);
+	
 	videoFileName				= XML.getValue("CONFIG:VIDEO:FILENAME", "test_videos/RearDI.m4v");
 	bcamera						= XML.getValue("CONFIG:SOURCE","VIDEO") == "MULTIPLEXER";
 	maxBlobs					= XML.getValue("CONFIG:BLOBS:MAXNUMBER", 20);
@@ -517,7 +520,17 @@ void ofxNCoreVision::_update(ofEventArgs &e)
 			//printf("sending data osc : %d TCP : %d binary : %d\n", myTUIO.bOSCMode, myTUIO.bTCPMode, myTUIO.bBinaryMode);
 			myTUIO.setMode(contourFinder.bTrackFingers , contourFinder.bTrackObjects, contourFinder.bTrackFiducials);
 			myTUIO.sendTUIO(&getBlobs(),&getObjects(),&fidfinder.fiducialsList);
+			cout<<bTCPSync;
+			
 		}
+
+		if(bTCPSync)
+			{
+				syncClient.setMode(contourFinder.bTrackFingers , contourFinder.bTrackObjects, contourFinder.bTrackFiducials);
+				syncClient.sendCoordinates(&getBlobs(),&getObjects(),&fidfinder.fiducialsList);
+				
+			}
+
 	}
 }
 

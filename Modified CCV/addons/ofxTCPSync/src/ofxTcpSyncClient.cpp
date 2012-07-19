@@ -5,12 +5,17 @@ ofxTCPSyncClient::ofxTCPSyncClient() {
     setDefaults(); 
 }
 
+ofxTCPSyncClient::~ofxTCPSyncClient() {
+	stopThread();
+tcpClient.close();
+}
+
 //--------------------------------------------------------------
 void ofxTCPSyncClient::setup(string _fileString, ofxTCPSyncClientListener* _parent, bool _autoMode) {
     parent   = _parent;
     autoMode = _autoMode;
     loadIniFile(_fileString);
-	cont=false;
+	
 	
 }
 
@@ -64,7 +69,7 @@ void ofxTCPSyncClient::start() {
 		else
 			out("TCP Client sending on::" +ofToString(serverOutPort));
 
-		startThread(true, false);
+		//startThread(true, false);
 	}
 
 	else{
@@ -81,25 +86,31 @@ void ofxTCPSyncClient::start() {
 			out("UDP Output Server setup on::" +ofToString(serverOutPort));
 		}
 
-		startThread(true, false);
+		//startThread(true, false);
 	}
      
 }
 
+void ofxTCPSyncClient::startT() {
+startThread(true, false);
+}
 void ofxTCPSyncClient::threadedFunction() {
     out("Running!");
     
 	send("S" + ofToString(id));
 	
     while (isThreadRunning()) {
+		
         if (lock()) {
 			if(bTCP){
 				msg = tcpClient.receive();
 				if (msg.length() > 0) {
+					cout<<"msg ruuuu"<<endl;
 					read(msg);
 				}
 			}
 			else{
+			
 				char udpMessage[10];
 				udpReceiver.Receive(udpMessage,10);
 				msg = udpMessage;
@@ -147,17 +158,48 @@ void ofxTCPSyncClient::read(string _serverInput) {
             fps = 1000.f / ms;
             lastMs = ofGetElapsedTimeMillis();
             
-            if (!autoMode) {
-                parent->frameEvent();
-            }
         }
+		else
+		{
+			cout<<"FrameCount value"<<frameCount<<endl;
+			out("frame mis-match");
+		}
     }
 
-	if (c == 'X')
+	else if (c == 'X')
 	{
-		tcpClient.close();
-		stopThread();
+		int clientID = ofToInt(_serverInput.substr(1,1));
+		if(clientID==id)
+		{
+			cout<<"Thread Stopped"<<endl;
+			stopThread();
+			setDefaults();
+			
+		}
+		else
+		{
+			frameCount=0;
+			allConnected=false;
+			cont=false;
+			//rendering=false;
+		}
 	}
+
+	else if( c == 'C')
+	{
+		string cpoints;
+		if(cameraBasesCalibration.size()==1){
+				int numPointTags = cameraBasesCalibration[0]->calibrationPoints.size();
+				for (int j = 0;j<numPointTags;j++){
+					cpoints += ofToString(cameraBasesCalibration[0]->calibrationPoints[j].X)+","+ofToString(cameraBasesCalibration[0]->calibrationPoints[j].X)+"|";
+				}
+				string message = "C,ON," + ofToString(id) + "|"+ cpoints;
+				send(message);
+		}
+		else
+			err("When using CCVMultiplexer, Only use 1 camera");
+	}
+		
 }
 
 
@@ -195,16 +237,21 @@ void ofxTCPSyncClient::quit() {
     out("Quitting.");
 	if(bTCP){
 		sendDisconnect();
-		ofSleepMillis(500);
-		tcpClient.close();
-		setDefaults();
+		//setDefaults();
+		// stopThread();
+		//ofSleepMillis(500);
+		//tcpClient.close();
+		
 	}
 	else{
+		
 		sendDisconnect();
-		udpReceiver.Close();
-		udpSender.Close();
+		// stopThread();
+		//udpReceiver.Close();
+		//udpSender.Close();
+		//setDefaults();
 	}
-    stopThread();
+   
 }
 
 void ofxTCPSyncClient::sendDisconnect() {
@@ -212,8 +259,70 @@ void ofxTCPSyncClient::sendDisconnect() {
 	if(bTCP)
 	{if(tcpClient.isConnected())
 	send("X" + ofToString(id));}
-	else
+	else{
 		send("X" + ofToString(id));
+		
+	}
+	
+}
+
+void ofxTCPSyncClient::setMode(bool fingers, bool objects, bool fiducials){
+	bfinger = fingers;
+	bobject = objects;
+	bfiducial = fiducials;
+}
+
+void ofxTCPSyncClient::sendCoordinates(std::map<int, Blob> * fingerBlobs, std::map<int, Blob> * objectBlobs ,std::list <ofxFiducial> * fiducialsList)
+{
+
+	if(bfinger)
+		{
+			if(fingerBlobs->size() == 0)
+			{
+				
+			}
+			else
+			{
+				int nblobs = fingerBlobs->size();
+				string blobmsg;
+				string startmsg = "F" + ofToString(id) + ofToString(nblobs)+"[/p]";
+				map<int, Blob>::iterator blob;
+				for(blob = fingerBlobs->begin(); blob != fingerBlobs->end(); blob++)
+				{
+					if(blob->second.centroid.x == 0 && blob->second.centroid.y == 0)
+						continue;
+
+					blobmsg+=ofToString(blob->second.centroid.x)+"|"+ofToString(blob->second.centroid.y)+"[/p]";
+				}
+
+				send(startmsg+blobmsg);
+			}
+	}
 
 	
+	if(bobject)
+		{
+			if(fingerBlobs->size() == 0)
+			{
+				
+			}
+			else
+			{
+				int nblobs = objectBlobs->size();
+				string blobmsg;
+				string startmsg = "F" + ofToString(id) + ofToString(nblobs)+"[/p]";
+				map<int, Blob>::iterator blob;
+				for(blob = objectBlobs->begin(); blob != objectBlobs->end(); blob++)
+				{
+					if(blob->second.centroid.x == 0 && blob->second.centroid.y == 0)
+						continue;
+
+					blobmsg+=ofToString(blob->second.centroid.x)+"|"+ofToString(blob->second.centroid.y)+"[/p]";
+				}
+
+				send(startmsg+blobmsg);
+			}
+	}
+
+
 }

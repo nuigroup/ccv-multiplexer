@@ -62,6 +62,7 @@ public:
 	void readSettingsFromXML(char* fileName="xml/multiplexer_settings.xml");
 	void saveSettingsToXML(char* fileName="xml/multiplexer_settings.xml");
 	void initializeCalibration();
+	std::vector<ofxCameraBaseCalibration* > cameraBasesCalibration;
 private:
 	void enumerateCameras();
 private:
@@ -73,7 +74,7 @@ private:
 	int calibrationGridWidth,calibrationGridHeight;
 	bool interleaveMode,needToUpdateBackground;
 	std::vector<ofxCameraBase* > cameraBases;
-	std::vector<ofxCameraBaseCalibration* > cameraBasesCalibration;
+	
 	std::vector<CAMERATYPE> allowdedCameraTypes;
 	bool isMultiplexerNeedToUpdate;
 };

@@ -549,6 +549,7 @@ void ofxMultiplexerManager::enumerateCameras()
 		}
 		if (allowdedCameraTypes[i] == DIRECTSHOW)
 		{
+			cout<<"*****************dshow camera*********************";
 			ofxCameraBase* cam = (ofxCameraBase*)(new ofxDShow());
 			int cameraCount = 0;
 			GUID* cameraGUIDs = cam->getBaseCameraGuids(&cameraCount);

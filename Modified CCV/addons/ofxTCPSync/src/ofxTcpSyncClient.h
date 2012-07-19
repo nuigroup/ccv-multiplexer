@@ -1,10 +1,12 @@
 #pragma once
 
 #include "ofMain.h"
-
+#include "../Tracking/ContourFinder.h"
+#include "ofxFiducial.h"
 #include "ofxNetwork.h"
 #include "ofxThread.h"
 #include "ofxXmlSettings.h"
+#include "ofxMultiplexerManager.h"
 
 //--------------------------------------------------------------
 class ofxTCPSyncClientListener {
@@ -13,11 +15,11 @@ class ofxTCPSyncClientListener {
 };
 
 //--------------------------------------------------------------
-class ofxTCPSyncClient : public ofxThread {
+class ofxTCPSyncClient : public ofxThread, public ofxMultiplexerManager {
 
 	public:
         ofxTCPSyncClient();
-		~ofxTCPSyncClient() { quit();}
+		~ofxTCPSyncClient();
         void  setup(string _fileString, ofxTCPSyncClientListener* _parent, bool _autoMode = true);
         void  start();
         void  stop();
@@ -51,6 +53,7 @@ class ofxTCPSyncClient : public ofxThread {
         }
     
         void threadedFunction();
+		void startT();
         void loadIniFile(string _fileString);
         
         void  out(string _msg);
@@ -97,6 +100,12 @@ class ofxTCPSyncClient : public ofxThread {
         vector<string> dataMessage;
         vector<int>    ints;
         vector<char>   bytes;
+
+		bool bfinger;
+		bool bobject;
+		bool bfiducial;
+		void setMode(bool fingers, bool objects, bool fiducials);
+		void sendCoordinates(std::map<int, Blob> * fingerBlobs, std::map<int, Blob> * objectBlobs ,std::list <ofxFiducial> * fiducialsList);
 
 		    
 };
