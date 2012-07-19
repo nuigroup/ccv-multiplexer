@@ -581,11 +581,6 @@ void ofxMultiplexerManager::enumerateCameras()
 			for (int j=0;j<cameraCount;j++)
 			{
 				ofxCameraBase* newCam = (ofxCameraBase*)(new ofxIPImage(server));
-				//if(j==1){
-				//	newCam->serverSetup("xml/TCPSyncServer.xml");
-				//	newCam->startServer();
-				//	}
-				//newCam(server);
 				newCam->initializeWithGUID(cameraGUIDs[j]);
 				cameraBases.push_back(newCam);
 			}

@@ -29,8 +29,11 @@ void ofxIPImage::callSettingsDialog()
 
 CAMERA_BASE_FEATURE* ofxIPImage::getSupportedFeatures(int* featuresCount)
 {
-	*featuresCount = 0;
+	*featuresCount = 2;
 	CAMERA_BASE_FEATURE* features = (CAMERA_BASE_FEATURE*)malloc(*featuresCount * sizeof(CAMERA_BASE_FEATURE));
+	features[0] = BASE_IP;
+	features[1] = BASE_ID;
+	//features[2] = BASE_CONNECTED;
 	return features;
 }
 

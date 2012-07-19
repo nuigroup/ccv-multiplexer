@@ -8,15 +8,15 @@ syncserver::~syncserver(){
 void syncserver::serverSetup(string _fileString){
 	loadServerSettings(_fileString);
 	setDefaults();
-	if(bTCP)
-	{}
-	else
-	{
-		udpReceiver.Create();
-		udpSender.Create();
-		udpReceiver.SetReuseAddress(true);
-		udpSender.SetReuseAddress(true);
-	}
+	//if(bTCP)
+	//{}
+	//else
+	//{
+		//udpReceiver.Create();
+		//udpSender.Create();
+		//udpReceiver.SetReuseAddress(true);
+		//udpSender.SetReuseAddress(true);
+	//}
 	
 	for(int i = 0; i < numExpectedClients; i++){
 		
@@ -35,7 +35,7 @@ void syncserver::serverSetup(string _fileString){
 		
 	}
 	
-	y=1;
+	y=0;
 }
 
 void syncserver::loadServerSettings(string _fileString){
@@ -88,6 +88,10 @@ void syncserver::startServer(){
 	}
 	else
 	{
+	udpReceiver.Create();
+	udpSender.Create();
+	udpReceiver.SetReuseAddress(true);
+	udpSender.SetReuseAddress(true);
 	udpSender.SetEnableBroadcast(true);
 	udpSender.SetReuseAddress(true);
 	udpReceiver.SetReuseAddress(true);
@@ -148,14 +152,15 @@ void syncserver::Server(){
 		//}
 
 		LeaveCriticalSection(&criticalSection);
-		y++;
+		
 		//cout<<"ok"<<check;
 		if(shouldTriggerFrame){
-						
+						cout<<"In G loop"<<endl;	
 					float now = ofGetElapsedTimef();
 					float elapsed = (now - lastFrameTriggeredTime);
 					
-					if(elapsed >= 1.0/fps){
+					if(elapsed >= 1.0/fps ){
+						y=1;
 							string message = "G,"+ofToString(currentFrame);
 							if (newMessage){
 								message += ","+currentMessage;
@@ -168,13 +173,15 @@ void syncserver::Server(){
 							lastFrameTriggeredTime = now;
 						currentFrame++;
 						i=numExpectedClients;
+						cout<<"VAlue of current frame:"<<currentFrame<<endl;
+						
 					}
 					
 		}
 		
 		
 		else {
-						
+					
 			
 					if(bTCP){
 						for(int i = 0; i < tcpServer.getLastID(); i++){
@@ -192,8 +199,8 @@ void syncserver::Server(){
 					}
 				
 					else{
-						char udpMessage[10];
-						udpReceiver.Receive(udpMessage,10);
+						char udpMessage[1000];
+						udpReceiver.Receive(udpMessage,1000);
 						string response = udpMessage;
 						//out(response);
 						if (response.length() > 0) {
@@ -204,33 +211,37 @@ void syncserver::Server(){
 					
 			
 		
-	ofSleepMillis(50);
+	ofSleepMillis(5);
 	}
 }
 
 void syncserver::shouldContinue(){
 	i--;
+	y=0;
+	cout<<"Should continue loop"<<endl;
 	if(!allconnected){
+		cout<<"abc asdasd**********"<<endl;
 		allconnected = true;
-		EnterCriticalSection(&criticalSection);
+		//EnterCriticalSection(&criticalSection);
 		for(int c = 0; c < connections.size(); c++){
 			if(!connections[c]->started){
 			allconnected = false;
 			break;
 			}
 		}
-		LeaveCriticalSection(&criticalSection);
+		
+		//LeaveCriticalSection(&criticalSection);
 		if(allconnected){
 			shouldTriggerFrame = true;
 		}
 						
 	}
-					
+			
 					//All connected and going
 	else {
 		
 		bool allready = true;
-		EnterCriticalSection(&criticalSection);
+		//EnterCriticalSection(&criticalSection);
 		for(int c = 0; c < connections.size(); c++){
 			if(!connections[c]->ready){
 				allready = false;
@@ -238,11 +249,12 @@ void syncserver::shouldContinue(){
 			}
 						
 		}
-		LeaveCriticalSection(&criticalSection);
+		//LeaveCriticalSection(&criticalSection);
 		if(allready && (i==0)){
 			shouldTriggerFrame = true;
 		}
 	}
+	
 				//	shouldContinue=false;
 }
 
@@ -254,7 +266,7 @@ void syncserver::read(string response) {
 			int clientID = ofToInt(response.substr(1,1));
 			if(clientID < numExpectedClients){
 					vector<string> info = ofSplitString(response, ",");
-					//connections[clientID].tcpServerIndex = i;
+					//connections[clientID]->serverIndex = clientID;
 					connections[clientID]->started = true;
 //					connections[clientID].name = info[1];
 					cout << "Client ID " << clientID << " with response " << response << endl;
@@ -273,21 +285,61 @@ void syncserver::read(string response) {
 
 					//todo validate client id
 					connections[clientID]->ready = true;
+					EnterCriticalSection(&criticalSection);
+					
+					//cvCircle(connections[clientID]->blobImage.getCvImage(),cvPoint(320,240),70,cvScalar(255,255,255),-1);
+					image_fill(connections[clientID]->test,0);
+					LeaveCriticalSection(&criticalSection);
 					shouldContinue();
 				}
 				
 			}
+			
 	}
+
+	else if(first == 'F'){
+		vector<string> strEntries = ofSplitString(response,"[/p]");
+		int clientID = ofToInt(response.substr(1,1));
+		connections[clientID]->points.clear();
+		for(int i=1;i<strEntries.size();i++){
+			vector<string> entry = ofSplitString(strEntries[i],"|");
+			ofPoint temp;
+			temp.x = atof(entry[0].c_str())*320;
+			temp.y = atof(entry[1].c_str())*240;
+			cout<<"X:"<<temp.x;
+			cout<<"y"<<temp.y<<endl;
+			//EnterCriticalSection(&criticalSection);
+			connections[clientID]->points.push_back(temp);
+			//cvCircle(connections[clientID]->blobImage.getCvImage(),cvPoint(320,240),30,cvScalar(255,255,255),-1);
+			//image_fill(connections[clientID]->test,0);
+			
+			//LeaveCriticalSection(&criticalSection);
+		}
+		EnterCriticalSection(&criticalSection);
+		//if(connections[clientID]->points.size()!=0)
+		//{
+			for(std::vector<ofPoint>::iterator it = connections[clientID]->points.begin();it != connections[clientID]->points.end();it++)
+			{	
+
+				draw_circle (connections[clientID]->test, 10,(*it).x,(*it).y, 0xff);
+			}
+		//}
+		LeaveCriticalSection(&criticalSection);
+	}
+		
 	else if(first == 'X'){
 		int clientID = ofToInt(response.substr(1,1));
 		connections[clientID]->started = false;
 		connections[clientID]->ready = false;
+		send("X" + ofToString(clientID));
 		allconnected = false;
 			//numConnectedClients = 0;
 			currentFrame = 0;
-			shouldTriggerFrame = false;
+			numConnectedClients--;
+			//shouldTriggerFrame = false;
 		//setDefaults();
-				
+		//restartServer();
+
 	}
 	
 }
@@ -372,21 +424,26 @@ void syncserver::read(string response,int i) {
 
 	else if(first == 'X'){
 		//ofSleepMillis(150);
-		ofSleepMillis(550);
-		send("X");
-		ofSleepMillis(500);
-		int clientID = ofToInt(response.substr(1,1));
-		out("Diconnect all clients"+ofToString(i));
-		for(int i = 0; i < numExpectedClients; i++){
-			tcpServer.disconnectClient(i);
-			//EnterCriticalSection(&criticalSection);
-			connections[clientID]->started = false;
-			connections[clientID]->ready = false;
-			//LeaveCriticalSection(&criticalSection);
-		}
+		//ofSleepMillis(550);
 		//send("X");
-		setDefaults();
-		restartServer();
+		//ofSleepMillis(500);
+		
+		int clientID = ofToInt(response.substr(1,1));
+		send("X" + ofToString(clientID));
+		//out("Diconnect all clients"+ofToString(i));
+	//	for(int i = 0; i < numExpectedClients; i++){
+			//tcpServer.disconnectClient(clientID);
+			//EnterCriticalSection(&criticalSection);
+			//connections[clientID]->started = false;
+			connections[clientID]->ready = false;
+			allconnected = false;
+			currentFrame=0;
+			numConnectedClients--;
+			//LeaveCriticalSection(&criticalSection);
+		//}
+		
+		//setDefaults();
+		//restartServer();
 	}
 	else{
 		//EnterCriticalSection(&criticalSection);
@@ -429,17 +486,26 @@ void syncserver::quit() {
 }
 
 void syncserver::restartServer(){
-	out("Restarting TCP Server");
+	out("Restarting Server");
+	isServerThreadRunning = false;
+	if(bTCP){
 	tcpServer.close();
-	Sleep(200);
-	EnterCriticalSection(&criticalSection);
-	isServerThreadRunning = false;
-	LeaveCriticalSection(&criticalSection);
+	//Sleep(200);
+	}
+	else{
+		udpSender.Close();
+		udpReceiver.Close();
+	}
+
+	//EnterCriticalSection(&criticalSection);
+	//isServerThreadRunning = false;
+	//LeaveCriticalSection(&criticalSection);
 	//CloseHandle(serverThread);
-	isServerThreadRunning = false;
-	ofSleepMillis(3000);
+	
+	out("Server Restart in 1 second!!!");
+	ofSleepMillis(1000);
 	startServer();
-	out("TCP Server Restart Complete!!!");
+	out("Server Restart Complete!!!");
 }
 
 
