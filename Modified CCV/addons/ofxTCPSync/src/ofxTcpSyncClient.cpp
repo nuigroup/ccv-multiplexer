@@ -284,6 +284,7 @@ void ofxTCPSyncClient::sendCoordinates(std::map<int, Blob> * fingerBlobs, std::m
 			else
 			{
 				int nblobs = fingerBlobs->size();
+				int npoints=0;
 				string blobmsg;
 				string startmsg = "F" + ofToString(id) + ofToString(nblobs)+"[/p]";
 				map<int, Blob>::iterator blob;
@@ -292,7 +293,14 @@ void ofxTCPSyncClient::sendCoordinates(std::map<int, Blob> * fingerBlobs, std::m
 					if(blob->second.centroid.x == 0 && blob->second.centroid.y == 0)
 						continue;
 
-					blobmsg+=ofToString(blob->second.centroid.x)+"|"+ofToString(blob->second.centroid.y)+"[/p]";
+					//npoints=blob->second.pts.size();
+					//blobmsg+=ofToString(npoints)+"|";
+					//for(std::vector<ofPoint>::iterator it = blob->second.pts.begin();it != blob->second.pts.end();it++)
+					//{
+					//	blobmsg+=ofToString((*it).x)+"|"+ofToString((*it).y)+"|";
+					//}
+					//blobmsg+="[/p]";
+					blobmsg+=ofToString(blob->second.centroid.x)+"|"+ofToString(blob->second.centroid.y)+"|"+ofToString(blob->second.angleBoundingRect.width)+"|"+ofToString(blob->second.angleBoundingRect.height)+"|"+ofToString(blob->second.angle)+"[/p]";
 				}
 
 				send(startmsg+blobmsg);

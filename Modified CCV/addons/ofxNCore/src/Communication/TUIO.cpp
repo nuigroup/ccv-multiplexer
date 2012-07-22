@@ -72,6 +72,8 @@ void TUIO::sendTUIO(std::map<int, Blob> * fingerBlobs, std::map<int, Blob> * obj
 					map<int, Blob>::iterator blob;
 					for(blob = fingerBlobs->begin(); blob != fingerBlobs->end(); blob++)
 					{
+						//for(int i=0;i<blob->second.nPts;i++)
+						//{cout<<"points"<<blob->second.pts[i].x;}
 						// omit point (0,0) since this means that we are outside of the range
 						if(blob->second.centroid.x == 0 && blob->second.centroid.y == 0)
 							continue;
@@ -94,7 +96,10 @@ void TUIO::sendTUIO(std::map<int, Blob> * fingerBlobs, std::map<int, Blob> * obj
 							set.addFloatArg(0.0f);								//TODO:A
 							set.addFloatArg(blob->second.maccel);				//m
 							set.addFloatArg(0.0f);								//TODO:r
+
 						}
+
+						
 						else
 						{
 							set.addFloatArg(blob->second.D.x);			// dX
