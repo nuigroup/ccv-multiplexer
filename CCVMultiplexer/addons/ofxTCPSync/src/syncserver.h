@@ -8,6 +8,7 @@
 #include "ofxNetwork.h"
 
 
+
 class syncserver{
 	public:
 	//Server details -- functions
@@ -44,7 +45,7 @@ class syncserver{
 	void disconntinue();
 	void image_set_pixel (unsigned char *data, size_t x, size_t y, unsigned char  value);
 	void draw_circle (unsigned char *data,int radius,int p1,int p2, unsigned char  value);
-	void image_fill (unsigned char *data, unsigned char value);
+	//void image_fill (unsigned char *data, unsigned char value);
 
 
 	vector<connection *> connections;

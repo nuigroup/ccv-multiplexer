@@ -1,4 +1,18 @@
 #include "ofxOpenCv.h"
+//#include "Blob.h"
+
+
+class blob{
+	 public:
+		 ofPoint             centroid;
+		 CvSize				axes;
+		 double  angle;
+		 vector<CvPoint> pvect;
+		 vector<vector<CvPoint> > contours;
+		 
+		 
+		
+};
 
 class connection{
 public:
@@ -7,10 +21,10 @@ public:
 		ready=false;
 		height =240;
 		width=240;
-		depth =3;
+		depth =1;
 		calibrate=false;
 		//test.allocate(320,240,OF_IMAGE_COLOR);
-		//blobImage.allocate(320,240);	
+		blobImage.allocate(320,240);	
 	}
 	bool started;
 	bool ready;
@@ -23,8 +37,8 @@ public:
 	int width;
 	int depth;
 	//bool test;
-	vector<ofPoint> points;
-	ofxCvColorImage blobImage;
+	vector<blob> points;
+	ofxCvGrayscaleImage blobImage;
 	unsigned char * test;
 	
 	//std::vector<ofPoint> points;

@@ -4,6 +4,7 @@ ofxIPImage::ofxIPImage(){
 	servercopy = NULL;
 	z=0;
 	cameraFrame = 0;
+	
 //	image.allocate(320,240);
 	//fbo.allocate(320,240,GL_RGB);
 	//cout<<"FBO Allocate"<<endl;
@@ -143,11 +144,23 @@ void ofxIPImage::getNewFrame(unsigned char* newFrame)
 	
 	//if(z%2)
 	//cout<<"check"<<servercopy->check;
-	//if(servercopy->check)
+	//if(servercopy->isServerThreadRunning)
 	//{
+	//grayImage = connections[
+		//cvRectangle(grayImage.getCvImage(),	cvPoint(0,0),cvPoint(320,240),cvScalar(0,0,0),-1);
+		//if(servercopy->connections[guid.Data1]->points.size()!=0)
+		//{
+		//	for(std::vector<ofPoint>::iterator it = servercopy->connections[guid.Data1]->points.begin();it != servercopy->connections[guid.Data1]->points.end();it++)
+		//	{
+		//		cvCircle(grayImage.getCvImage(),cvPoint((*it).x ,(*it).y),10,cvScalar(255,255,255),-1);
+		//	}	
+		//	servercopy->connections[guid.Data1]->points.clear();
+		//}
+	//}
+	
 	//image_fill(newFrame,0);
 	//draw_circle (newFrame, 10,0,0, 0xff);
-	//if(servercopy->connections[guid.Data1]->points.size()!=0)
+	
 	//{
 		//k=0;
 		//image_fill(newFrame,0);
@@ -164,15 +177,17 @@ void ofxIPImage::getNewFrame(unsigned char* newFrame)
 	//}
 	
 	//servercopy->connections[guid.Data1]->points.clear();
-	memcpy((void*)newFrame,(unsigned char*)servercopy->connections[guid.Data1]->test,320*240*1*sizeof(unsigned char));
-	//}
-	//z++;
-	//}
+	
+
+	z++;
+	memcpy((void*)newFrame,servercopy->connections[guid.Data1]->blobImage.getPixels(),320*240*1*sizeof(unsigned char));
+	
 }
 
 void ofxIPImage::cameraInitializationLogic()
 {
-	image.allocate(320,240);
+	//image.allocate(320,240);
+	grayImage.allocate(320,240);
 	width = 320;
 	height = 240;
 	depth =1;
@@ -184,3 +199,7 @@ void ofxIPImage::cameraDeinitializationLogic()
 }
 
 
+void ofxIPImage::image_fill(unsigned char *data, unsigned char  value)
+{
+	 memset (data, value, 320*240);
+}

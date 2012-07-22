@@ -29,12 +29,13 @@ protected:
 	void cameraDeinitializationLogic();
 	void setCameraType();
 	
-	ofxCvColorImage image;
+	ofxCvGrayscaleImage 	grayImage;
 	int z;
 	int k;
-	//unsigned char *p;
+	unsigned char *image;
 	
-	
+	void image_fill (unsigned char *data, unsigned char value);
+
 };
 
 

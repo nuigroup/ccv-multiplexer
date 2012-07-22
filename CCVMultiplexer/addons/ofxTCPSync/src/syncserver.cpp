@@ -199,8 +199,8 @@ void syncserver::Server(){
 					}
 				
 					else{
-						char udpMessage[1000];
-						udpReceiver.Receive(udpMessage,1000);
+						char udpMessage[100000];
+						udpReceiver.Receive(udpMessage,100000);
 						string response = udpMessage;
 						//out(response);
 						if (response.length() > 0) {
@@ -288,7 +288,7 @@ void syncserver::read(string response) {
 					EnterCriticalSection(&criticalSection);
 					
 					//cvCircle(connections[clientID]->blobImage.getCvImage(),cvPoint(320,240),70,cvScalar(255,255,255),-1);
-					image_fill(connections[clientID]->test,0);
+					//image_fill(connections[clientID]->test,0);
 					LeaveCriticalSection(&criticalSection);
 					shouldContinue();
 				}
@@ -296,18 +296,34 @@ void syncserver::read(string response) {
 			}
 			
 	}
-
+	
 	else if(first == 'F'){
 		vector<string> strEntries = ofSplitString(response,"[/p]");
 		int clientID = ofToInt(response.substr(1,1));
+		//EnterCriticalSection(&criticalSection);
 		connections[clientID]->points.clear();
+		//LeaveCriticalSection(&criticalSection);
 		for(int i=1;i<strEntries.size();i++){
 			vector<string> entry = ofSplitString(strEntries[i],"|");
-			ofPoint temp;
-			temp.x = atof(entry[0].c_str())*320;
-			temp.y = atof(entry[1].c_str())*240;
-			cout<<"X:"<<temp.x;
-			cout<<"y"<<temp.y<<endl;
+			blob temp;
+			//for(int j=1;j<entry.size();j=j+2)
+		//	{
+			//	CvPoint tempp;
+				
+			//	tempp.x=atof(entry[j].c_str());
+			//	tempp.y=atof(entry[j+1].c_str());
+
+				//temp.pvect.push_back(tempp);
+			//}
+
+			//temp.contours.push_back(temp.pvect);
+
+			temp.centroid.x= atof(entry[0].c_str())*320;
+			temp.centroid.y = atof(entry[1].c_str())*240;
+			temp.axes.width = atof(entry[2].c_str());
+			temp.axes.height = atof(entry[3].c_str());
+			temp.angle = atof(entry[4].c_str());
+		
 			//EnterCriticalSection(&criticalSection);
 			connections[clientID]->points.push_back(temp);
 			//cvCircle(connections[clientID]->blobImage.getCvImage(),cvPoint(320,240),30,cvScalar(255,255,255),-1);
@@ -316,14 +332,17 @@ void syncserver::read(string response) {
 			//LeaveCriticalSection(&criticalSection);
 		}
 		EnterCriticalSection(&criticalSection);
-		//if(connections[clientID]->points.size()!=0)
-		//{
-			for(std::vector<ofPoint>::iterator it = connections[clientID]->points.begin();it != connections[clientID]->points.end();it++)
+		if(connections[clientID]->points.size()!=0)
+		{
+			cvRectangle(connections[clientID]->blobImage.getCvImage(),	cvPoint(0,0),cvPoint(320,240),cvScalar(0,0,0),-1);
+			for(std::vector<blob>::iterator it = connections[clientID]->points.begin();it != connections[clientID]->points.end();it++)
 			{	
-
-				draw_circle (connections[clientID]->test, 10,(*it).x,(*it).y, 0xff);
+				cvEllipse(connections[clientID]->blobImage.getCvImage(),cvPoint((*it).centroid.x,(*it).centroid.y),cvSize((*it).axes.width,(*it).axes.height), (*it).angle,0,360,cvScalar(255,255,255),-1); 
+				//cvCircle(connections[clientID]->blobImage.getCvImage(),cvPoint((*it).centroid.x ,(*it).centroid.y),10,cvScalar(255,255,255),-1);
+			//	draw_circle (connections[clientID]->test, 10,(*it).x,(*it).y, 0xff);
+			//	cvDrawContours(connections[clientID]->blobImage.getCvImage(),(*it).contours,cvScalar(255,255,255),cvScalar(255,255,255),0,-1);
 			}
-		//}
+		}
 		LeaveCriticalSection(&criticalSection);
 	}
 		
@@ -381,7 +400,7 @@ void syncserver::read(string response,int i) {
 					EnterCriticalSection(&criticalSection);
 					
 					//cvCircle(connections[clientID]->blobImage.getCvImage(),cvPoint(320,240),70,cvScalar(255,255,255),-1);
-					image_fill(connections[clientID]->test,0);
+					//image_fill(connections[clientID]->test,0);
 					LeaveCriticalSection(&criticalSection);
 					shouldContinue();
 					
@@ -394,31 +413,35 @@ void syncserver::read(string response,int i) {
 	else if(first == 'F'){
 		vector<string> strEntries = ofSplitString(response,"[/p]");
 		int clientID = ofToInt(response.substr(1,1));
-		connections[clientID]->points.clear();
+		//connections[clientID]->points.clear();
 		for(int i=1;i<strEntries.size();i++){
 			vector<string> entry = ofSplitString(strEntries[i],"|");
-			ofPoint temp;
-			temp.x = atof(entry[0].c_str())*320;
-			temp.y = atof(entry[1].c_str())*240;
-			cout<<"X:"<<temp.x;
-			cout<<"y"<<temp.y<<endl;
-			//EnterCriticalSection(&criticalSection);
+			blob temp;
+			temp.centroid.x= atof(entry[0].c_str())*320;
+			temp.centroid.y = atof(entry[1].c_str())*240;
+			temp.axes.width = atof(entry[2].c_str());
+			temp.axes.height = atof(entry[3].c_str());
+			temp.angle = atof(entry[4].c_str());
+		
+			//cout<<"X:"<<temp.x;
+			//cout<<"y"<<temp.y<<endl;
+			EnterCriticalSection(&criticalSection);
 			connections[clientID]->points.push_back(temp);
 			//cvCircle(connections[clientID]->blobImage.getCvImage(),cvPoint(320,240),30,cvScalar(255,255,255),-1);
 			//image_fill(connections[clientID]->test,0);
 			
-			//LeaveCriticalSection(&criticalSection);
+			LeaveCriticalSection(&criticalSection);
 		}
-		EnterCriticalSection(&criticalSection);
+		//EnterCriticalSection(&criticalSection);
 		//if(connections[clientID]->points.size()!=0)
 		//{
-			for(std::vector<ofPoint>::iterator it = connections[clientID]->points.begin();it != connections[clientID]->points.end();it++)
-			{	
+			//for(std::vector<ofPoint>::iterator it = connections[clientID]->points.begin();it != connections[clientID]->points.end();it++)
+			//{	
 
-				draw_circle (connections[clientID]->test, 10,(*it).x,(*it).y, 0xff);
-			}
+			//	draw_circle (connections[clientID]->test, 10,(*it).x,(*it).y, 0xff);
+			//}
 		//}
-		LeaveCriticalSection(&criticalSection);
+		//LeaveCriticalSection(&criticalSection);
 	}
 		
 
@@ -542,7 +565,7 @@ void syncserver::draw_circle (unsigned char *data,int radius,int p1,int p2, unsi
         image_set_pixel (data, x+p1, y+p2, value);
 }
 
-void syncserver::image_fill(unsigned char *data, unsigned char  value)
-{
-	 memset (data, value, 320*240);
-}
+//void syncserver::image_fill(unsigned char *data, unsigned char  value)
+//{
+	// memset (data, value, 320*240);
+//}

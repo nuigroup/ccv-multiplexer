@@ -98,8 +98,8 @@
             <TYPE>IPIMAGE</TYPE>
             <FRAME>
                 <RAW>0</RAW>
-                <WIDTH>640</WIDTH>
-                <HEIGHT>480</HEIGHT>
+                <WIDTH>320</WIDTH>
+                <HEIGHT>240</HEIGHT>
                 <LEFT>0</LEFT>
                 <TOP>0</TOP>
             </FRAME>
@@ -115,8 +115,8 @@
             <TYPE>IPIMAGE</TYPE>
             <FRAME>
                 <RAW>0</RAW>
-                <WIDTH>640</WIDTH>
-                <HEIGHT>480</HEIGHT>
+                <WIDTH>320</WIDTH>
+                <HEIGHT>240</HEIGHT>
                 <LEFT>0</LEFT>
                 <TOP>0</TOP>
             </FRAME>
