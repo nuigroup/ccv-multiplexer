@@ -7,16 +7,20 @@ ofxTCPSyncClient::ofxTCPSyncClient() {
 
 ofxTCPSyncClient::~ofxTCPSyncClient() {
 	stopThread();
-tcpClient.close();
+	if(bTCP)
+		tcpClient.close();
+	else{
+		udpSender.Close();
+		udpReceiver.Close();
+	}
 }
 
 //--------------------------------------------------------------
 void ofxTCPSyncClient::setup(string _fileString, ofxTCPSyncClientListener* _parent, bool _autoMode) {
-    parent   = _parent;
+  
+	parent   = _parent;
     autoMode = _autoMode;
     loadIniFile(_fileString);
-	
-	
 }
 
 void ofxTCPSyncClient::create(){
@@ -37,7 +41,7 @@ void ofxTCPSyncClient::loadIniFile(string _fileString) {
     if (!xmlReader.loadFile(_fileString)) 
         err("ERROR loading XML file!");
 	else
-		out("Xml Loaded successfully");
+		out("client settings Xml Loaded successfully");
 
     hostName   = xmlReader.getValue("settings:server:ip", "127.0.0.1", 0);
     serverOutPort = xmlReader.getValue("settings:server:serveroutport", 11999, 0);
@@ -69,7 +73,7 @@ void ofxTCPSyncClient::start() {
 		else
 			out("TCP Client sending on::" +ofToString(serverOutPort));
 
-		//startThread(true, false);
+		
 	}
 
 	else{
@@ -86,13 +90,14 @@ void ofxTCPSyncClient::start() {
 			out("UDP Output Server setup on::" +ofToString(serverOutPort));
 		}
 
-		//startThread(true, false);
 	}
      
 }
 
 void ofxTCPSyncClient::startT() {
+
 startThread(true, false);
+
 }
 void ofxTCPSyncClient::threadedFunction() {
     out("Running!");
@@ -105,7 +110,6 @@ void ofxTCPSyncClient::threadedFunction() {
 			if(bTCP){
 				msg = tcpClient.receive();
 				if (msg.length() > 0) {
-					cout<<"msg ruuuu"<<endl;
 					read(msg);
 				}
 			}
@@ -130,62 +134,69 @@ void ofxTCPSyncClient::read(string _serverInput) {
     out("Receiving: " + _serverInput);
         
     char c = _serverInput.at(0);
-	if (c == 'G' || c == 'B' || c == 'I') {
-        if (!allConnected) {
-            allConnected = true;
-        }
-        vector<string> info = ofSplitString(_serverInput, ":");
-        vector<string> frameMessage = ofSplitString(info[0], ",");
-        int fc = ofToInt(frameMessage[1]);
-        
-        if (info.size() > 1) {
-            info.erase(info.begin());
-            dataMessage.clear();
-            dataMessage = info;
-            bMessageAvailable = true;
-        } else {
-            bMessageAvailable = false;
-        }
-        
-        
-        bIntsAvailable  = false;
-        bBytesAvailable = false; 
-        
-        if (fc == frameCount) {
-            rendering = true;
-			cont =true;
-			float ms = ofGetElapsedTimeMillis() - lastMs;
-            fps = 1000.f / ms;
-            lastMs = ofGetElapsedTimeMillis();
-            
-        }
-		else
-		{
-			cout<<"FrameCount value"<<frameCount<<endl;
-			out("frame mis-match");
-		}
-    }
-
-	else if (c == 'X')
+	
+	switch(c)
 	{
-		int clientID = ofToInt(_serverInput.substr(1,1));
-		if(clientID==id)
-		{
-			cout<<"Thread Stopped"<<endl;
-			stopThread();
-			setDefaults();
+		case 'G':
+			{
+				if (!allConnected) {
+					 allConnected = true;
+				}
+				vector<string> info = ofSplitString(_serverInput, ":");
+				vector<string> frameMessage = ofSplitString(info[0], ",");
+				int fc = ofToInt(frameMessage[1]);
+        
+				if (info.size() > 1) {
+					info.erase(info.begin());
+					dataMessage.clear();
+					dataMessage = info;
+					bMessageAvailable = true;
+				} else {
+					bMessageAvailable = false;
+				}
+        
+        
+				bIntsAvailable  = false;
+				bBytesAvailable = false; 
+        
+				if (fc == frameCount) {
+						rendering = true;
+						cont =true;
+						float ms = ofGetElapsedTimeMillis() - lastMs;
+						fps = 1000.f / ms;
+						lastMs = ofGetElapsedTimeMillis();
+            
+				}
+				else
+				{
 			
-		}
-		else
-		{
-			frameCount=0;
-			allConnected=false;
-			cont=false;
-			//rendering=false;
-		}
+					err("frame mis-match, restart!");
+				}
+ 			}
+				break;
+	case 'X':
+			{
+				int clientID = ofToInt(_serverInput.substr(1,1));
+				if(clientID==id)
+				{
+					cout<<"Client Thread Stopped"<<endl;
+					stopThread();
+					setDefaults();
+			
+				}
+				else
+				{
+					frameCount=0;
+					allConnected=false;
+					cont=false;
+				}
+			}
+			break;
+
 	}
 
-	else if( c == 'C')
+	/*
+	case 'C':
 	{
 		string cpoints;
 		if(cameraBasesCalibration.size()==1){
@@ -199,7 +210,7 @@ void ofxTCPSyncClient::read(string _serverInput) {
 		else
 			err("When using CCVMultiplexer, Only use 1 camera");
 	}
-		
+	*/
 }
 
 
@@ -223,33 +234,28 @@ void ofxTCPSyncClient::broadcast(string _msg) {
 //--------------------------------------------------------------
 void ofxTCPSyncClient::done() {
     
-    string msg = "D," + ofToString(id) + "," + ofToString(frameCount);
+    string msg = "D" + ofToString(id) +","+ ofToString(frameCount)+","+ ofToString(sendingData);
     send(msg);
 	frameCount++;
 	cont =false;
+	cout<<"sending data value in done:"<<sendingData<<endl;
+	sendingData=0;
 	
 }
 
 //--------------------------------------------------------------
-// Stops the client thread.  You don't really need to do this ever.
+// Stops the client thread. 
 //--------------------------------------------------------------
 void ofxTCPSyncClient::quit() {
     out("Quitting.");
 	if(bTCP){
 		sendDisconnect();
-		//setDefaults();
-		// stopThread();
-		//ofSleepMillis(500);
-		//tcpClient.close();
-		
+			
 	}
 	else{
 		
 		sendDisconnect();
-		// stopThread();
-		//udpReceiver.Close();
-		//udpSender.Close();
-		//setDefaults();
+		
 	}
    
 }
@@ -274,14 +280,11 @@ void ofxTCPSyncClient::setMode(bool fingers, bool objects, bool fiducials){
 
 void ofxTCPSyncClient::sendCoordinates(std::map<int, Blob> * fingerBlobs, std::map<int, Blob> * objectBlobs ,std::list <ofxFiducial> * fiducialsList)
 {
-
+	
 	if(bfinger)
 		{
-			if(fingerBlobs->size() == 0)
-			{
-				
-			}
-			else
+			
+			if(fingerBlobs->size() != 0)
 			{
 				int nblobs = fingerBlobs->size();
 				int npoints=0;
@@ -293,17 +296,12 @@ void ofxTCPSyncClient::sendCoordinates(std::map<int, Blob> * fingerBlobs, std::m
 					if(blob->second.centroid.x == 0 && blob->second.centroid.y == 0)
 						continue;
 
-					//npoints=blob->second.pts.size();
-					//blobmsg+=ofToString(npoints)+"|";
-					//for(std::vector<ofPoint>::iterator it = blob->second.pts.begin();it != blob->second.pts.end();it++)
-					//{
-					//	blobmsg+=ofToString((*it).x)+"|"+ofToString((*it).y)+"|";
-					//}
-					//blobmsg+="[/p]";
-					blobmsg+=ofToString(blob->second.centroid.x)+"|"+ofToString(blob->second.centroid.y)+"|"+ofToString(blob->second.angleBoundingRect.width)+"|"+ofToString(blob->second.angleBoundingRect.height)+"|"+ofToString(blob->second.angle)+"[/p]";
+					blobmsg+=ofToString(blob->second.centroid.x)+"|"+ofToString(blob->second.centroid.y)+"|"+ofToString(blob->second.angleBoundingRect.width/2)+"|"+ofToString(blob->second.angleBoundingRect.height/2)+"|"+ofToString(blob->second.angle)+"[/p]";
 				}
 
 				send(startmsg+blobmsg);
+				sendingData = 1;
+				cout<<"sending data value in tuio:"<<sendingData<<endl;
 			}
 	}
 
@@ -318,14 +316,14 @@ void ofxTCPSyncClient::sendCoordinates(std::map<int, Blob> * fingerBlobs, std::m
 			{
 				int nblobs = objectBlobs->size();
 				string blobmsg;
-				string startmsg = "F" + ofToString(id) + ofToString(nblobs)+"[/p]";
+				string startmsg = "O" + ofToString(id) + ofToString(nblobs)+"[/p]";
 				map<int, Blob>::iterator blob;
 				for(blob = objectBlobs->begin(); blob != objectBlobs->end(); blob++)
 				{
 					if(blob->second.centroid.x == 0 && blob->second.centroid.y == 0)
 						continue;
 
-					blobmsg+=ofToString(blob->second.centroid.x)+"|"+ofToString(blob->second.centroid.y)+"[/p]";
+					blobmsg+=ofToString(blob->second.centroid.x)+"|"+ofToString(blob->second.centroid.y)+"|"+ofToString(blob->second.angleBoundingRect.width/2)+"|"+ofToString(blob->second.angleBoundingRect.height/2)+"|"+ofToString(blob->second.angle)+"[/p]";
 				}
 
 				send(startmsg+blobmsg);

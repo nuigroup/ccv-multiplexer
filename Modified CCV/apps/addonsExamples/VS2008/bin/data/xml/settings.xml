@@ -1,7 +1,7 @@
 <settings>
 	<client_id>0</client_id>
 	<server>
-		<ip>192.168.1.5</ip>
+		<ip>192.168.1.4</ip>
 		<serveroutport>11999</serveroutport>
 	</server>
 	<serverinport>11998</serverinport>

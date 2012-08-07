@@ -20,16 +20,19 @@ class ofxTCPSyncClient : public ofxThread, public ofxMultiplexerManager {
 	public:
         ofxTCPSyncClient();
 		~ofxTCPSyncClient();
+		
+		//Setuop the client
         void  setup(string _fileString, ofxTCPSyncClientListener* _parent, bool _autoMode = true);
         void  start();
         void  stop();
-		void create();
+		void  create();
         int   getID()   { return id; }
         int   getFrameCount() { return frameCount; }
         float getFPS()        { return fps; }
         bool  isRendering()   { return rendering; }
         void  broadcast(string _msg);
 		
+		//additional stuff, not used, maybe helpful in the furture
         bool  messageAvailable() { return bMessageAvailable; }
         vector<string> getDataMessage() { return dataMessage; }
         bool  intsAvailable() { return bIntsAvailable; }
@@ -40,16 +43,16 @@ class ofxTCPSyncClient : public ofxThread, public ofxMultiplexerManager {
         void  done();
         void  quit();
     
-        void setDefaults() {
-                             
+        void setDefaults() 
+		{
             rendering = false;
             autoMode  = false;
             frameCount = 0;
             fps        = 0.f;
             lastMs     = 0;
-            cont =false;
+            cont = false;
             allConnected = false;
-            
+			sendingData = 0;
         }
     
         void threadedFunction();
@@ -106,6 +109,6 @@ class ofxTCPSyncClient : public ofxThread, public ofxMultiplexerManager {
 		bool bfiducial;
 		void setMode(bool fingers, bool objects, bool fiducials);
 		void sendCoordinates(std::map<int, Blob> * fingerBlobs, std::map<int, Blob> * objectBlobs ,std::list <ofxFiducial> * fiducialsList);
-
+		int sendingData;
 		    
 };

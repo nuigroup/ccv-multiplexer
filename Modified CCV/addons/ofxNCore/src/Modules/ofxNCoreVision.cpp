@@ -18,24 +18,22 @@ void ofxNCoreVision::_setup(ofEventArgs &e)
 {
 	//ofSetFrameRate(60);
 	//set the title
-	ofSetWindowTitle("Community Core Vision - 1.5");
+	ofSetWindowTitle("Community Core Vision - 1.5.1 - CCV Multiplexer");
 	//create filter
 	if(filter == NULL)	filter = new ProcessFilters();
 //	if ( filter_fiducial == NULL ){filter_fiducial = new ProcessFilters();}
 	if ( filter_fiducial == NULL ){filter_fiducial = new ProcessFiducialFilters();}
 
-	syncClient.setup("xml/settings.xml", this);
+
+	//CCV Multiplexer client setup
+	syncClient.setup("xml/client_settings.xml", this);
 	syncClient.create();
 	syncClient.start();
+
+
 	//Load Settings from config file
 	loadXMLSettings();
 	
-	if(bTCPSync)
-	{
-		syncClient.create();
-		syncClient.start();
-		
-	}
 	if(debugMode)
 	{
 		printf("DEBUG MODE : Printing to File\n");
@@ -157,6 +155,7 @@ void ofxNCoreVision::_setup(ofEventArgs &e)
 
 }
 
+//getting events from ccvm client
 void ofxNCoreVision::frameEvent() {
     // read any incoming messages
    //if (syncClient.messageAvailable()) {
@@ -435,10 +434,12 @@ void ofxNCoreVision::_update(ofEventArgs &e)
 		bNewFrame = vidPlayer->isFrameNew();
 	}
 	//if no new frame, return
+
+	//when using frame sync of ccvm
 	if(bTCPSync)
 	{
-	bNewFrame = syncClient.isRendering();
-	syncClient.rendering =false;
+		bNewFrame = syncClient.isRendering();
+		syncClient.rendering =false;
 	}
 
 	if(!bNewFrame)
@@ -524,6 +525,8 @@ void ofxNCoreVision::_update(ofEventArgs &e)
 			
 		}
 
+		//sending ccvm data
+		//No support for fiducials, as they cannot be drawn!
 		if(bTCPSync)
 			{
 				syncClient.setMode(contourFinder.bTrackFingers , contourFinder.bTrackObjects, contourFinder.bTrackFiducials);
@@ -622,9 +625,12 @@ void ofxNCoreVision::grabFrameToGPU(GLuint target)
 *****************************************************************************/
 void ofxNCoreVision::_draw(ofEventArgs &e)
 {
-	if(bTCPSync && syncClient.shouldContinue()){
-	syncClient.done();
+	// tell ccvm that, that 'n'th frame has been captured using camera
+	if(bTCPSync && syncClient.shouldContinue())
+	{
+		syncClient.done();
 	}
+
 	if (showConfiguration)
 	{
 		//if calibration
@@ -782,6 +788,7 @@ void ofxNCoreVision::drawMiniMode()
 		for (int i=0; i<contourFinder.nBlobs; i++)
 		{
 			contourFinder.blobs[i].drawContours(0,0, camWidth, camHeight, ofGetWidth(), ofGetHeight()-96);
+			
 		}
 		for (int i=0;i<contourFinder.nObjects; i++)
 		{
