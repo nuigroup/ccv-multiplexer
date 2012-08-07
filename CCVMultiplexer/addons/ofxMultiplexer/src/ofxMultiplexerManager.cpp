@@ -26,6 +26,7 @@ ofxMultiplexerManager::~ofxMultiplexerManager()
 	saveSettingsToXML();
 	
 	Sleep(50);
+	if(shouldRunServer)
 	server->disconntinue();
 	//Sleep(50);
 	for (int i=0;i<cameraBases.size();i++)
@@ -501,9 +502,17 @@ int ofxMultiplexerManager::getCameraBaseCount()
 
 void ofxMultiplexerManager::enumerateCameras()
 {
-	server = new syncserver();
-	server->serverSetup("xml/TCPSyncServer.xml");
-	server->startServer();
+	ofxXmlSettings*	xmlSettings = new ofxXmlSettings();
+	xmlSettings->loadFile("xml/app_settings.xml");
+	shouldRunServer = xmlSettings->getValue("CONFIG:MULTIPLEXER:CAMERATYPES:IPIMAGE", 0);
+	if(shouldRunServer)
+	{
+		server = new syncserver();
+		server->serverSetup("xml/TCPSyncServer.xml");
+		server->startServer();
+	}
+	delete xmlSettings;
+	xmlSettings = NULL;
 
 	for (int i=0;i<allowdedCameraTypes.size();i++)
 	{

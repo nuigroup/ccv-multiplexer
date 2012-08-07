@@ -82,6 +82,7 @@ private:
 	std::vector<ofxCameraBaseCalibration* > cameraBasesCalibration;
 	std::vector<CAMERATYPE> allowdedCameraTypes;
 	bool isMultiplexerNeedToUpdate;
+	bool shouldRunServer;
 
 public:
 	syncserver* server;

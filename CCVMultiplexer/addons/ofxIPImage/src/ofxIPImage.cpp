@@ -70,7 +70,7 @@ void ofxIPImage::StartSettingsDialog()
 LRESULT CALLBACK ofxIPImage::WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) 
 {
 	static CREATESTRUCT   *cs;
-	static HWND	id,connected,running;
+	static HWND	id,connected;
 	
 	ofxIPImage* camera = (ofxIPImage*) GetWindowLongPtr(hwnd,GWLP_USERDATA);
 	if (camera!=NULL)
@@ -90,12 +90,7 @@ LRESULT CALLBACK ofxIPImage::WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM
 			SendMessage(GetDlgItem(hwnd, 1), TBM_SETPOS, TRUE, firstValue);
 			SetWindowTextA(connected,firstValue ? "Connected" : "Not Connected");
 
-			camera->getCameraFeature(BASE_CONNECTED,&firstValue,&secondValue,&isAuto,&isEnabled,&minValue,&maxValue);
-			SendMessage(GetDlgItem(hwnd, 2), TBM_SETPOS, TRUE, firstValue);
-			SetWindowTextA(running,firstValue ? "Running" : "Not Running");
-
-			
-			
+					
 			
 		}
 	}
@@ -112,10 +107,7 @@ LRESULT CALLBACK ofxIPImage::WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM
                                     10, 30, 140, 20, hwnd, NULL, NULL, NULL);
 				connected = CreateWindow("static", " ",SS_LEFT | WS_CHILD | WS_VISIBLE,
 										135, 30, 145, 25,hwnd,(HMENU)1, NULL, NULL);
-				CreateWindow("STATIC", "Running Status:", SS_LEFT | WS_CHILD | WS_VISIBLE, 
-                                    10, 50, 140, 20, hwnd, NULL, NULL, NULL);
-				running = CreateWindow("static", " ",SS_LEFT | WS_CHILD | WS_VISIBLE,
-										120, 50, 145, 25,hwnd,(HMENU)2, NULL, NULL);
+				
 				
 			}
 			break;
@@ -136,7 +128,7 @@ CAMERA_BASE_FEATURE* ofxIPImage::getSupportedFeatures(int* featuresCount)
 	features[0] = BASE_IP;
 	features[1] = BASE_ID;
 	features[2] = BASE_CONNECTED;
-	features[3] = BASE_RUNNING;
+	
 	return features;
 }
 
@@ -201,114 +193,12 @@ void ofxIPImage::getCameraFeature(CAMERA_BASE_FEATURE featureCode,int* firstValu
 			*maxValue = 100;
 			*isAuto = true;
 			break;
-		case BASE_RUNNING:
-			*firstValue = servercopy->connections[guid.Data1]->ready;
-			*isEnabled = true;
-			*secondValue = 0;
-			*minValue = 0;
-			*maxValue = 1;
-			*isAuto = true;
-			break;
+	
 	}
 }
 
 void ofxIPImage::getNewFrame(unsigned char* newFrame)
 {	 
-	
-	//cout<<"thread run"<<endl;
-	//cout<<"Number of Points"<<servercopy->connections.size()<<endl;
-	
-
-	
-		
-	//memcpy((void*)newFrame,(unsigned char*)image.getPixels(),320*240*3*sizeof(unsigned char));
-
-
-	
-	/*cvRectangle(connections[0].blobImage.getCvImage(),cvPoint(0,0),cvPoint(320,240),cvScalar(0,0,0),-1);
-	memcpy((void*)newFrame,(unsigned char*)connections[0].blobImage.getPixels(),320*240*3*sizeof(unsigned char));
-	if(connections[0].ready)
-	memcpy((void*)newFrame,(unsigned char*)connections[0].blobImage.getPixels(),320*240*3*sizeof(unsigned char));*/
-	//getPixels(guid.Data1,newFrame);
-	
-	//ofxCvColorImage test;
-	//image.allocate(320,240);
-	//cout<<"points value"<<connections[0]->points.size()<<endl;
-	//cout<<"GUID number"<<guid.Data1<<endl;
-	//EnterCriticalSection(&criticalSection); 
-	//cvRectangle(image.getCvImage(),cvPoint(0,0),cvPoint(320,240),cvScalar(0,0,0),-1);
-	//LeaveCriticalSection(&criticalSection); 
-	//if(servercopy->connections[guid.Data1]->points.size()!=0)
-	//if(z%2!=0)
-	//{
-		//cvRectangle(image.getCvImage(),cvPoint(0,0),cvPoint(320,240),cvScalar(0,0,0),-1);
-		//for(std::vector<ofPoint>::iterator it = connections[guid.Data1]->points.begin();it != connections[guid.Data1]->points.end();it++)
-		//{
-			//cvCircle(image.getCvImage(),cvPoint((*it).x ,(*it).y),30,cvScalar(255,255,255),-1);
-		//cvCircle(image.getCvImage(),cvPoint(70 ,40),30,cvScalar(255,255,255),-1);
-		//}
-		//cout<<"ENTER"<<endl;
-		
-	//}
-	//else
-	//{
-		//cvRectangle(image.getCvImage(),	cvPoint(0,0),cvPoint(320,240),cvScalar(255,255,255),-1);
-		//cvCircle(image.getCvImage(),cvPoint(70 ,40),30,cvScalar(0,0,0),-1);
-		//cout<<"Outside"<<endl;
-		
-		/*cout<<"get new frae"<<endl;
-		}
-	if(servercopy->connections[guid.Data1]->points.size()!=0)
-	{
-		for(std::vector<ofPoint>::iterator it = servercopy->connections[guid.Data1]->points.begin();it != servercopy->connections[guid.Data1]->points.end();it++)
-		{
-			cout<<"Node:"<<guid.Data1<<"Points:"<<(*it).x<<","<<(*it).y<<endl;
-		}
-	}
-	else
-		cout<<"Node:"<<guid.Data1<<"No points recieved"<<endl;
-			//cvCircle(image.getCvImage(),cvPoint((*it).x ,(*it).y),30,cvScalar(255,255,255),-1);
-		//cvCircle(image.getCvImage(),cvPoint(70 ,40),30,cvScalar(255,255,255),-1);
-		//}*/
-	
-	//if(z%2)
-	//cout<<"check"<<servercopy->check;
-	//if(servercopy->isServerThreadRunning)
-	//{
-	//grayImage = connections[
-		//cvRectangle(grayImage.getCvImage(),	cvPoint(0,0),cvPoint(320,240),cvScalar(0,0,0),-1);
-		//if(servercopy->connections[guid.Data1]->points.size()!=0)
-		//{
-		//	for(std::vector<ofPoint>::iterator it = servercopy->connections[guid.Data1]->points.begin();it != servercopy->connections[guid.Data1]->points.end();it++)
-		//	{
-		//		cvCircle(grayImage.getCvImage(),cvPoint((*it).x ,(*it).y),10,cvScalar(255,255,255),-1);
-		//	}	
-		//	servercopy->connections[guid.Data1]->points.clear();
-		//}
-	//}
-	
-	//image_fill(newFrame,0);
-	//draw_circle (newFrame, 10,0,0, 0xff);
-	
-	//{
-		//k=0;
-		//image_fill(newFrame,0);
-		//draw_circle (newFrame, 10,0,0, 0xff);
-		//for(std::vector<ofPoint>::iterator it = servercopy->connections[guid.Data1]->points.begin();it != servercopy->connections[guid.Data1]->points.end();it++)
-		//{	
-		//	cout<<"for loop running"<<k<<"times";
-	//		if((*it).x<160 && (*it).y<160)
-	//		draw_circle (newFrame, 10,-(*it).x,-(*it).y, 0xff);
-		//	else
-		//	draw_circle (newFrame, 10,(*it).x-160,(*it).y-160, 0xff);
-	//		k++;
-	//	}
-	//}
-	
-	//servercopy->connections[guid.Data1]->points.clear();
-	
-
-	
 	memcpy((void*)newFrame,servercopy->connections[guid.Data1]->blobImage.getPixels(),320*240*1*sizeof(unsigned char));
 	
 }
