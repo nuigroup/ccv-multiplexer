@@ -1,7 +1,7 @@
 <CAMERAS>
     <CAMERA>
         <SETTINGS>
-            <GUID>ÿ</GUID>
+            <GUID>0</GUID>
             <TYPE>IPIMAGE</TYPE>
             <FRAME>
                 <RAW>0</RAW>
@@ -39,7 +39,7 @@
                     <AUTO>0</AUTO>
                 </CONTRAST>
                 <GAIN>
-                    <VALUE>225</VALUE>
+                    <VALUE>193</VALUE>
                     <AUTO>0</AUTO>
                 </GAIN>
                 <SATURATION>
@@ -47,7 +47,7 @@
                     <AUTO>0</AUTO>
                 </SATURATION>
                 <SHARPNESS>
-                    <VALUE>53</VALUE>
+                    <VALUE>3</VALUE>
                     <AUTO>0</AUTO>
                 </SHARPNESS>
                 <EXPOSURE>
@@ -55,23 +55,6 @@
                     <AUTO>1</AUTO>
                 </EXPOSURE>
                 <FRAMERATE>15</FRAMERATE>
-            </SENSOR>
-        </SETTINGS>
-    </CAMERA>
-    <CAMERA>
-        <SETTINGS>
-            <GUID>4294967295</GUID>
-            <TYPE>IPIMAGE</TYPE>
-            <FRAME>
-                <RAW>0</RAW>
-                <WIDTH>320</WIDTH>
-                <HEIGHT>240</HEIGHT>
-                <LEFT>0</LEFT>
-                <TOP>0</TOP>
-            </FRAME>
-            <SENSOR>
-                <MODE>0</MODE>
-                <DEPTH>3</DEPTH>
             </SENSOR>
         </SETTINGS>
     </CAMERA>
@@ -129,23 +112,6 @@
     <CAMERA>
         <SETTINGS>
             <GUID>4</GUID>
-            <TYPE>IPIMAGE</TYPE>
-            <FRAME>
-                <RAW>0</RAW>
-                <WIDTH>640</WIDTH>
-                <HEIGHT>480</HEIGHT>
-                <LEFT>0</LEFT>
-                <TOP>0</TOP>
-            </FRAME>
-            <SENSOR>
-                <MODE>0</MODE>
-                <DEPTH>1</DEPTH>
-            </SENSOR>
-        </SETTINGS>
-    </CAMERA>
-    <CAMERA>
-        <SETTINGS>
-            <GUID>0</GUID>
             <TYPE>IPIMAGE</TYPE>
             <FRAME>
                 <RAW>0</RAW>

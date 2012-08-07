@@ -453,6 +453,7 @@ void ofxNCoreVision::_update(ofEventArgs &e)
 			lastFPSlog = time;
 		}//End calculation
 
+	
 		float beforeTime = ofGetElapsedTimeMillis();
 
 		if (bGPUMode)

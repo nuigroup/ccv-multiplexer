@@ -62,7 +62,7 @@ class syncserver{
 	float lastFrameTriggeredTime;
 	bool allconnected;
 	bool running;                
-	int fps;
+	int Fps;
 	int numExpectedClients;
 	int numConnectedClients;
 	int currentFrame;

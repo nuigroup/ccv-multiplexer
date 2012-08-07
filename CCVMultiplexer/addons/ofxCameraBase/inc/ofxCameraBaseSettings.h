@@ -61,6 +61,7 @@ typedef enum
 	BASE_IP,
 	BASE_ID,
 	BASE_CONNECTED,
+	BASE_RUNNING,
 } CAMERA_BASE_FEATURE;
 
 class ofxCameraBase;

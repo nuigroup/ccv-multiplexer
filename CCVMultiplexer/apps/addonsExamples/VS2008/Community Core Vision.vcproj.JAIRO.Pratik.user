@@ -10,7 +10,7 @@
 			>
 			<DebugSettings
 				Command="$(TargetPath)"
-				WorkingDirectory="C:\Documents and Settings\Pratik\Desktop\CCV1.5 Source\apps\addonsExamples\VS2008\bin"
+				WorkingDirectory="C:\Documents and Settings\Pratik\Desktop\Multiplexer\apps\addonsExamples\VS2008\bin"
 				CommandArguments=""
 				Attach="false"
 				DebuggerType="3"

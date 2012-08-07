@@ -2,7 +2,7 @@
 	<serverinport>11999</serverinport>
 	<serveroutport>11998</serveroutport>
 	<numclients>1</numclients>
-	<fps>10</fps>
+	<fps>30</fps>
 	<broadcast>192.168.1.255</broadcast>
-	<protocol>UDP</protocop>
+	<protocol>TCP</protocop>
 </settings>

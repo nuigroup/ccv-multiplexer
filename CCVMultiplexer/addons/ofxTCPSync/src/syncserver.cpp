@@ -46,7 +46,7 @@ void syncserver::loadServerSettings(string _fileString){
 		out("Xml Loaded successfully");
 
 	 
-    fps=xmlReader->getValue("settings:fps", 5, 0);
+    Fps=xmlReader->getValue("settings:fps", 5, 0);
 	serverInPort = xmlReader->getValue("settings:serverinport", 11999, 0);
 	serverOutPort = xmlReader->getValue("settings:serveroutport",11998,0);
 	numExpectedClients = xmlReader->getValue("settings:numclients", 1, 0);
@@ -54,7 +54,7 @@ void syncserver::loadServerSettings(string _fileString){
 	bTCP = xmlReader->getValue("settings:protocol","UDP") == "TCP";
 	i=numExpectedClients;
 
-    out("XML Settings: fps = " + ofToString(fps) + ", Number of Client = " + ofToString(numExpectedClients));
+    out("XML Settings: fps = " + ofToString(Fps) + ", Number of Client = " + ofToString(numExpectedClients));
 	delete xmlReader;
 	xmlReader = NULL;
 }
@@ -130,36 +130,17 @@ void syncserver::Server(){
 		//cout<<"y="<<y<<endl;
 		check = 1;
 		
-		//if(y%2==0){
-		//	image_fill(connections[0]->test,0);
-			//draw_circle (connections[0]->test, 0xff);
-		//	cvRectangle(connections[0]->blobImage.getCvImage(),cvPoint(0,0),cvPoint(320,240),cvScalar(0,0,0),-1);
-			//cvCircle(connections[0]->blobImage.getCvImage(),cvPoint(100,100),70,cvScalar(255,255,255),-1);
-			//connections[0]->test.loadImage("car.jpg");
-			//connections[1]->test.loadImage("car.jpg");
-			
-		
 
-		//}
-		//else{
-			//cvRectangle(connections[0]->blobImage.getCvImage(),cvPoint(0,0),cvPoint(320,240),cvScalar(255,255,255),-1);
-			//cvCircle(connections[0]->blobImage.getCvImage(),cvPoint(100,100),70,cvScalar(0,0,0),-1);
-		//connections[0]->test.loadImage("black.jpg");
-		//connections[1]->test.loadImage("black.jpg");
-		//image_fill(connections[0]->test,0xff);
-			//draw_circle (connections[0]->test, 0);
-		
-		//}
 
 		LeaveCriticalSection(&criticalSection);
 		
 		//cout<<"ok"<<check;
 		if(shouldTriggerFrame){
-						cout<<"In G loop"<<endl;	
+							
 					float now = ofGetElapsedTimef();
 					float elapsed = (now - lastFrameTriggeredTime);
 					
-					if(elapsed >= 1.0/fps ){
+					if(elapsed >= 1.0/Fps ){
 						y=1;
 							string message = "G,"+ofToString(currentFrame);
 							if (newMessage){
@@ -173,8 +154,7 @@ void syncserver::Server(){
 							lastFrameTriggeredTime = now;
 						currentFrame++;
 						i=numExpectedClients;
-						cout<<"VAlue of current frame:"<<currentFrame<<endl;
-						
+											
 					}
 					
 		}
@@ -261,12 +241,18 @@ void syncserver::shouldContinue(){
 void syncserver::read(string response) {
 	out("Receiving: " + response);
 	char first = response.at(0);
-	if(first == 'S'){
+	int clientID = ofToInt(response.substr(1,1));
+
+	switch(first)
+	{
+
+	case 'S':
+		{
 					//this is where it starts!
-			int clientID = ofToInt(response.substr(1,1));
+			//int clientID = ofToInt(response.substr(1,1));
 			if(clientID < numExpectedClients){
 					vector<string> info = ofSplitString(response, ",");
-					//connections[clientID]->serverIndex = clientID;
+					connections[clientID]->serverIndex = clientID;
 					connections[clientID]->started = true;
 //					connections[clientID].name = info[1];
 					cout << "Client ID " << clientID << " with response " << response << endl;
@@ -275,37 +261,52 @@ void syncserver::read(string response) {
 			else{
 					err("Received Client ID " + ofToString(clientID)  + " out of range");
 				}
-	}
-	else if(first == 'D'){
+		}
+		break;
+
+	case 'D':
+		{
+		
 			vector<string> info = ofSplitString(response, ",");
 			if(info.size() >= 3){
-				int clientID = ofToInt(info[1]);
-				int fc = ofToInt(info[2]);
+				
+				//int clientID = ofToInt(info[1]);
+				int fc = ofToInt(info[1]);
 				if(fc == currentFrame-1){
 
-					//todo validate client id
+					cout<<"frame count"<<fc<<endl;
 					connections[clientID]->ready = true;
-					EnterCriticalSection(&criticalSection);
+					//EnterCriticalSection(&criticalSection);
 					
 					//cvCircle(connections[clientID]->blobImage.getCvImage(),cvPoint(320,240),70,cvScalar(255,255,255),-1);
 					//image_fill(connections[clientID]->test,0);
-					LeaveCriticalSection(&criticalSection);
+					//LeaveCriticalSection(&criticalSection);
 					shouldContinue();
 				}
-				
+				if(ofToInt(info[2])==0)
+				{
+					cout<<"in black loop"<<endl;
+					EnterCriticalSection(&criticalSection);
+					connections[clientID]->points.clear();
+					memset(connections[clientID]->blobImage.getPixels(),0,320*240);
+					LeaveCriticalSection(&criticalSection);
+				}
 			}
 			
-	}
+		}
+		break;
 	
-	else if(first == 'F'){
-		vector<string> strEntries = ofSplitString(response,"[/p]");
-		int clientID = ofToInt(response.substr(1,1));
-		//EnterCriticalSection(&criticalSection);
-		connections[clientID]->points.clear();
-		//LeaveCriticalSection(&criticalSection);
-		for(int i=1;i<strEntries.size();i++){
-			vector<string> entry = ofSplitString(strEntries[i],"|");
-			blob temp;
+	case 'F':
+		{
+
+			vector<string> strEntries = ofSplitString(response,"[/p]");
+			//int clientID = ofToInt(response.substr(1,1));
+			//EnterCriticalSection(&criticalSection);
+			connections[clientID]->points.clear();
+			//LeaveCriticalSection(&criticalSection);
+			for(int i=1;i<strEntries.size();i++){
+				vector<string> entry = ofSplitString(strEntries[i],"|");
+				blob temp;
 			//for(int j=1;j<entry.size();j=j+2)
 		//	{
 			//	CvPoint tempp;
@@ -318,36 +319,68 @@ void syncserver::read(string response) {
 
 			//temp.contours.push_back(temp.pvect);
 
+				temp.centroid.x= atof(entry[0].c_str())*320;
+				temp.centroid.y = atof(entry[1].c_str())*240;
+				temp.axes.width = atof(entry[2].c_str());
+				temp.axes.height = atof(entry[3].c_str());
+				temp.angle = atof(entry[4].c_str());
+		
+			//EnterCriticalSection(&criticalSection);
+				connections[clientID]->points.push_back(temp);
+			//cvCircle(connections[clientID]->blobImage.getCvImage(),cvPoint(320,240),30,cvScalar(255,255,255),-1);
+			//image_fill(connections[clientID]->test,0);
+			
+			//LeaveCriticalSection(&criticalSection);
+			}
+			EnterCriticalSection(&criticalSection);
+			if(connections[clientID]->points.size()!=0)
+			{
+				memset(connections[clientID]->blobImage.getPixels(),0,320*240);
+			//meset is faster than using cvRectangle!
+			//cvRectangle(connections[clientID]->blobImage.getCvImage(),	cvPoint(0,0),cvPoint(320,240),cvScalar(0,0,0),-1);
+				for(std::vector<blob>::iterator it = connections[clientID]->points.begin();it != connections[clientID]->points.end();it++)
+				{	
+					cvEllipse(connections[clientID]->blobImage.getCvImage(),cvPoint((*it).centroid.x,(*it).centroid.y),cvSize((*it).axes.width,(*it).axes.height), (*it).angle,0,360,cvScalar(255,255,255),-1); 
+				//cvCircle(connections[clientID]->blobImage.getCvImage(),cvPoint((*it).centroid.x ,(*it).centroid.y),10,cvScalar(255,255,255),-1);
+			//	draw_circle (connections[clientID]->test, 10,(*it).x,(*it).y, 0xff);
+			//	cvDrawContours(connections[clientID]->blobImage.getCvImage(),(*it).contours,cvScalar(255,255,255),cvScalar(255,255,255),0,-1);
+				}
+			}
+			LeaveCriticalSection(&criticalSection);
+		}
+		break;
+	
+	case 'O':
+		{
+		vector<string> strEntries = ofSplitString(response,"[/p]");
+		connections[clientID]->points.clear();
+		for(int i=1;i<strEntries.size();i++){
+			vector<string> entry = ofSplitString(strEntries[i],"|");
+			blob temp;
 			temp.centroid.x= atof(entry[0].c_str())*320;
 			temp.centroid.y = atof(entry[1].c_str())*240;
 			temp.axes.width = atof(entry[2].c_str());
 			temp.axes.height = atof(entry[3].c_str());
 			temp.angle = atof(entry[4].c_str());
-		
-			//EnterCriticalSection(&criticalSection);
 			connections[clientID]->points.push_back(temp);
-			//cvCircle(connections[clientID]->blobImage.getCvImage(),cvPoint(320,240),30,cvScalar(255,255,255),-1);
-			//image_fill(connections[clientID]->test,0);
-			
-			//LeaveCriticalSection(&criticalSection);
 		}
 		EnterCriticalSection(&criticalSection);
 		if(connections[clientID]->points.size()!=0)
 		{
-			cvRectangle(connections[clientID]->blobImage.getCvImage(),	cvPoint(0,0),cvPoint(320,240),cvScalar(0,0,0),-1);
+			memset(connections[clientID]->blobImage.getPixels(),0,320*240);
+			//cvRectangle(connections[clientID]->blobImage.getCvImage(),	cvPoint(0,0),cvPoint(320,240),cvScalar(0,0,0),-1);
 			for(std::vector<blob>::iterator it = connections[clientID]->points.begin();it != connections[clientID]->points.end();it++)
 			{	
-				cvEllipse(connections[clientID]->blobImage.getCvImage(),cvPoint((*it).centroid.x,(*it).centroid.y),cvSize((*it).axes.width,(*it).axes.height), (*it).angle,0,360,cvScalar(255,255,255),-1); 
-				//cvCircle(connections[clientID]->blobImage.getCvImage(),cvPoint((*it).centroid.x ,(*it).centroid.y),10,cvScalar(255,255,255),-1);
-			//	draw_circle (connections[clientID]->test, 10,(*it).x,(*it).y, 0xff);
-			//	cvDrawContours(connections[clientID]->blobImage.getCvImage(),(*it).contours,cvScalar(255,255,255),cvScalar(255,255,255),0,-1);
+				cvRectangle(connections[clientID]->blobImage.getCvImage(),cvPoint((*it).centroid.x,(*it).centroid.y),cvPoint((*it).centroid.x+(*it).axes.width,(*it).centroid.y+(*it).axes.height),cvScalar(255,255,255),-1);
 			}
 		}
 		LeaveCriticalSection(&criticalSection);
-	}
-		
-	else if(first == 'X'){
-		int clientID = ofToInt(response.substr(1,1));
+		}
+		break;
+
+	case 'X':
+		{
+		//int clientID = ofToInt(response.substr(1,1));
 		connections[clientID]->started = false;
 		connections[clientID]->ready = false;
 		send("X" + ofToString(clientID));
@@ -359,21 +392,27 @@ void syncserver::read(string response) {
 		//setDefaults();
 		//restartServer();
 
+		}
+		break;
 	}
-	
 }
 
 void syncserver::read(string response,int i) {
 	
 	out("Receiving: " + response);
 	char first = response.at(0);
-	if(first == 'S'){
+	int clientID = ofToInt(response.substr(1,1));
+
+	switch(first)
+	{
+	case 'S':
+		{
 					//that's the start!
-			int clientID = ofToInt(response.substr(1,1));
+			//int clientID = ofToInt(response.substr(1,1));
 			if(clientID < numExpectedClients){
 					vector<string> info = ofSplitString(response, ",");
 					//EnterCriticalSection(&criticalSection);
-					connections[clientID]->serverIndex = i;
+					connections[clientID]->serverIndex = clientID;
 					connections[clientID]->started = true;
 					//LeaveCriticalSection(&criticalSection);
 //					connections[clientID].name = info[1];
@@ -386,14 +425,16 @@ void syncserver::read(string response,int i) {
 			else{
 					err("Received Client ID " + ofToString(clientID)  + " out of range");
 				}
-			
-	}
-	else if(first == 'D'){
+		}
+		break;
+
+	case 'D':
+		{
 	
 			vector<string> info = ofSplitString(response, ",");
 			if(info.size() >= 3){
-				int clientID = ofToInt(info[1]);
-				int fc = ofToInt(info[2]);
+				//int clientID = ofToInt(info[1]);
+				int fc = ofToInt(info[1]);
 				if(fc == currentFrame-1){
 				   	//todo validate client id
 					connections[clientID]->ready = true;
@@ -405,15 +446,24 @@ void syncserver::read(string response,int i) {
 					shouldContinue();
 					
 				}
-				else
-					out("Frame Mis-Match");
+				if(ofToInt(info[2])==0)
+				{
+					cout<<"in black loop"<<endl;
+					EnterCriticalSection(&criticalSection);
+					connections[clientID]->points.clear();
+					memset(connections[clientID]->blobImage.getPixels(),0,320*240);
+					LeaveCriticalSection(&criticalSection);
+				}
 						
 			}
-	}
-	else if(first == 'F'){
+		}
+		break;
+
+	case 'F':
+		{
 		vector<string> strEntries = ofSplitString(response,"[/p]");
 		int clientID = ofToInt(response.substr(1,1));
-		//connections[clientID]->points.clear();
+		connections[clientID]->points.clear();
 		for(int i=1;i<strEntries.size();i++){
 			vector<string> entry = ofSplitString(strEntries[i],"|");
 			blob temp;
@@ -432,32 +482,68 @@ void syncserver::read(string response,int i) {
 			
 			LeaveCriticalSection(&criticalSection);
 		}
-		//EnterCriticalSection(&criticalSection);
-		//if(connections[clientID]->points.size()!=0)
-		//{
-			//for(std::vector<ofPoint>::iterator it = connections[clientID]->points.begin();it != connections[clientID]->points.end();it++)
-			//{	
-
+		EnterCriticalSection(&criticalSection);
+			if(connections[clientID]->points.size()!=0)
+			{
+				memset(connections[clientID]->blobImage.getPixels(),0,320*240);
+			//meset is faster than using cvRectangle!
+			//cvRectangle(connections[clientID]->blobImage.getCvImage(),	cvPoint(0,0),cvPoint(320,240),cvScalar(0,0,0),-1);
+				for(std::vector<blob>::iterator it = connections[clientID]->points.begin();it != connections[clientID]->points.end();it++)
+				{	
+					cvEllipse(connections[clientID]->blobImage.getCvImage(),cvPoint((*it).centroid.x,(*it).centroid.y),cvSize((*it).axes.width,(*it).axes.height), (*it).angle,0,360,cvScalar(255,255,255),-1); 
+				//cvCircle(connections[clientID]->blobImage.getCvImage(),cvPoint((*it).centroid.x ,(*it).centroid.y),10,cvScalar(255,255,255),-1);
 			//	draw_circle (connections[clientID]->test, 10,(*it).x,(*it).y, 0xff);
-			//}
-		//}
-		//LeaveCriticalSection(&criticalSection);
-	}
+			//	cvDrawContours(connections[clientID]->blobImage.getCvImage(),(*it).contours,cvScalar(255,255,255),cvScalar(255,255,255),0,-1);
+				}
+			}
+		LeaveCriticalSection(&criticalSection);
 		
+		}
+		break;
+	
+	case 'O':
+		{
+		vector<string> strEntries = ofSplitString(response,"[/p]");
+		connections[clientID]->points.clear();
+		for(int i=1;i<strEntries.size();i++){
+			vector<string> entry = ofSplitString(strEntries[i],"|");
+			blob temp;
+			temp.centroid.x= atof(entry[0].c_str())*320;
+			temp.centroid.y = atof(entry[1].c_str())*240;
+			temp.axes.width = atof(entry[2].c_str());
+			temp.axes.height = atof(entry[3].c_str());
+			temp.angle = atof(entry[4].c_str());
+			connections[clientID]->points.push_back(temp);
+		}
+		EnterCriticalSection(&criticalSection);
+		if(connections[clientID]->points.size()!=0)
+		{
+			memset(connections[clientID]->blobImage.getPixels(),0,320*240);
+			//cvRectangle(connections[clientID]->blobImage.getCvImage(),	cvPoint(0,0),cvPoint(320,240),cvScalar(0,0,0),-1);
+			for(std::vector<blob>::iterator it = connections[clientID]->points.begin();it != connections[clientID]->points.end();it++)
+			{	
+				cvRectangle(connections[clientID]->blobImage.getCvImage(),cvPoint((*it).centroid.x,(*it).centroid.y),cvPoint((*it).centroid.x+(*it).axes.width,(*it).centroid.y+(*it).axes.height),cvScalar(255,255,255),-1);
+			}
+		}
+		LeaveCriticalSection(&criticalSection);
+		}
+		break;
 
-	else if(first == 'X'){
+	case 'X':
+		{
 		//ofSleepMillis(150);
 		//ofSleepMillis(550);
 		//send("X");
 		//ofSleepMillis(500);
 		
-		int clientID = ofToInt(response.substr(1,1));
+		//int clientID = ofToInt(response.substr(1,1));
 		send("X" + ofToString(clientID));
 		//out("Diconnect all clients"+ofToString(i));
 	//	for(int i = 0; i < numExpectedClients; i++){
 			//tcpServer.disconnectClient(clientID);
 			//EnterCriticalSection(&criticalSection);
 			//connections[clientID]->started = false;
+			connections[clientID]->started = false;
 			connections[clientID]->ready = false;
 			allconnected = false;
 			currentFrame=0;
@@ -468,12 +554,14 @@ void syncserver::read(string response,int i) {
 		//setDefaults();
 		//restartServer();
 	}
-	else{
+	break;
+}
+	//else{
 		//EnterCriticalSection(&criticalSection);
-		connections[i]->started = false;
-		connections[i]->ready =false;
+		//connections[i]->started = false;
+		//connections[i]->ready =false;
 		//LeaveCriticalSection(&criticalSection);
-	}
+	//}
 }
 
 void syncserver::send(string _msg) {

@@ -29,12 +29,16 @@ protected:
 	void cameraDeinitializationLogic();
 	void setCameraType();
 	
-	ofxCvGrayscaleImage 	grayImage;
-	int z;
-	int k;
-	unsigned char *image;
+private:
+	static DWORD WINAPI SettingsThread(LPVOID instance);
+	static LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
+	void StartSettingsDialog();
+	HANDLE settingsGUIThread;
+	bool isSettedDefaultSettings;
 	
-	void image_fill (unsigned char *data, unsigned char value);
+	
+	
+	
 
 };
 
