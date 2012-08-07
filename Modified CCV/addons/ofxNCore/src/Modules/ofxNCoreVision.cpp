@@ -157,16 +157,7 @@ void ofxNCoreVision::_setup(ofEventArgs &e)
 
 //getting events from ccvm client
 void ofxNCoreVision::frameEvent() {
-    // read any incoming messages
-   //if (syncClient.messageAvailable()) {
-      //  vector<string> msg = syncClient.getDataMessage();
-      //  vector<string> xy = ofSplitString(msg[0], ",");
-       // float x = ofToInt(xy[0]);
-       // float y = ofToInt(xy[1]);
-       // Ball* ball = new Ball(x, y, client.getMWidth(), client.getMHeight());
-       // balls.push_back(ball);
-
-   // }
+    
 }
 
 /****************************************************************
